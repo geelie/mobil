@@ -207,7 +207,7 @@
                         <input type="text" id="p-vin" placeholder="Serie VIN" class="w-full p-3 border-2 border-slate-200 rounded-lg font-mono font-black uppercase text-blue-800 text-sm">
                         <input type="text" id="p-mod" placeholder="Marcă / Model" class="w-full p-3 border-2 border-slate-200 rounded-lg font-semibold text-sm">
                         <div class="flex gap-2">
-                            <input type="text" id="p-fact" placeholder="Factură" class="w-1/2 p-3 border-2 border-slate-200 rounded-lg text-xs font-bold">
+                            <input type="text" id="p-fact" placeholder="Emitent/Factură" class="w-1/2 p-3 border-2 border-slate-200 rounded-lg text-xs font-bold">
                             <input type="date" id="p-dfact" class="w-1/2 p-3 border-2 border-slate-200 rounded-lg text-xs font-bold">
                         </div>
                         <select id="p-gar" class="w-full p-3 border-2 border-slate-200 rounded-lg text-sm font-bold">
@@ -557,7 +557,7 @@
                             <p><b class="font-black">CATEGORIE:</b> ${f.categorie}</p>
                             <p><b class="font-black">MODEL:</b> ${f.marca_model}</p>
                             <p><b class="font-black">VIN:</b> <span class="text-blue-700 font-black uppercase font-mono">${f.vin_produs}</span></p>
-                            <p><b class="font-black">FACTURĂ:</b> ${f.nr_factura || '-'} / ${f.data_factura || '-'}</p>
+                            <p><b class="font-black">EMITENT/FACTURĂ:</b> ${f.nr_factura || '-'} / ${f.data_factura || '-'}</p>
                             <p><b class="font-black">GARANȚIE:</b> ${f.tip_garantie}</p>
                             <p><b class="font-black">OBS:</b> ${f.obs_produs || '-'}</p>
                             <p><b class="font-black text-red-700">DATA PREDĂRII:</b> ${f.data_preluare_fizica || '-'}</p>

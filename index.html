@@ -557,10 +557,10 @@
                             <p><b class="font-black">CATEGORIE:</b> ${f.categorie}</p>
                             <p><b class="font-black">MODEL:</b> ${f.marca_model}</p>
                             <p><b class="font-black">VIN:</b> <span class="text-blue-700 font-black uppercase font-mono">${f.vin_produs}</span></p>
-                            <p><b class="font-black">EMITENT/FACTURĂ:</b> ${f.nr_factura || '-'} / ${f.data_factura || '-'}</p>
+                            <p><b class="font-black">EMITENT/FACTURĂ:</b> ${f.nr_factura || '-'} / ${f.data_factura ? f.data_factura.split('-').reverse().join('-') : '-'}</p>
                             <p><b class="font-black">GARANȚIE:</b> ${f.tip_garantie}</p>
                             <p><b class="font-black">OBS:</b> ${f.obs_produs || '-'}</p>
-                            <p><b class="font-black text-red-700">DATA PREDĂRII:</b> ${f.data_preluare_fizica || '-'}</p>
+                            <p><b class="font-black text-red-700">DATA PREDĂRII FIZICE:</b> ${f.data_preluare_fizica ? f.data_preluare_fizica.split('-').reverse().join('-') : '-'}</p>
                         </div>
                     </div>
                     <div class="bg-slate-100 p-3 border-2 border-slate-200 italic mb-3 text-[11px] md:text-[13px] text-slate-900 rounded-lg">

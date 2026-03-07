@@ -9,47 +9,51 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .a4-page { width: 210mm; min-height: 297mm; padding: 15mm; margin: auto; background: white; color: black; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; }
         
-        /* Ajustări pentru ecrane mici (Mobile) */
-        @media (max-width: 768px) {
-            .a4-page { 
-                width: 100%; 
-                min-height: auto; 
-                padding: 10px; 
-                box-shadow: none;
-            }
-            #main-nav button {
-                padding: 12px 10px;
-                font-size: 10px;
-                flex: 1;
-                text-align: center;
-            }
-            .grid-cols-2, .grid-cols-3 {
-                grid-template-columns: 1fr !important;
-            }
+        /* Container A4 adaptiv pentru previzualizare */
+        .a4-page { 
+            width: 100%; 
+            max-width: 210mm; 
+            min-height: 297mm; 
+            padding: 10mm; 
+            margin: auto; 
+            background: white; 
+            color: black; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.1); 
+            position: relative; 
         }
 
-       @media print { 
-    .no-print { display: none !important; } 
-    body { background: white !important; margin: 0; padding: 0; }
-    #modal-view { 
-        position: absolute; top: 0; left: 0; 
-        background: white !important; display: block !important; 
-        overflow: visible !important; width: 100%;
-    }
-    .a4-page { 
-        box-shadow: none; margin: 0; border: none; 
-        width: 210mm; height: 296mm; 
-        padding: 8mm !important; 
-        overflow: hidden; 
-    }
-    #app-section, #auth-section { display: none !important; }
-    #v-render-area { height: 100%; display: flex; flex-direction: column; }
-}
+        /* Scrollbar fin pentru meniu mobil */
+        #main-nav::-webkit-scrollbar { height: 4px; }
+        #main-nav::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        @media print { 
+            .no-print { display: none !important; } 
+            body { background: white !important; margin: 0; padding: 0; }
+            #modal-view { 
+                position: absolute; top: 0; left: 0; 
+                background: white !important; display: block !important; 
+                overflow: visible !important; width: 100%;
+            }
+            .a4-page { 
+                box-shadow: none; margin: 0; border: none; 
+                width: 210mm; height: 296mm; 
+                padding: 8mm !important; 
+                overflow: hidden; 
+            }
+            #app-section, #auth-section { display: none !important; }
+            #v-render-area { height: 100%; display: flex; flex-direction: column; }
+        }
+
+        /* Ajustări specifice pentru ecrane foarte mici */
+        @media (max-width: 640px) {
+            .a4-page { padding: 5mm; min-height: auto; }
+            h1 { font-size: 1.25rem !important; }
+            .mobile-grid-cols { grid-template-columns: 1fr !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100">
@@ -63,14 +67,14 @@
                 <input type="password" id="l-pass" placeholder="Parolă" class="w-full p-3 border-2 border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-semibold">
                 
                 <div class="flex items-center gap-2 px-1">
-                    <input type="checkbox" id="l-remember" class="w-4 h-4 cursor-pointer">
+                    <input type="checkbox" id="l-remember" class="w-5 h-5 cursor-pointer">
                     <label for="l-remember" class="text-sm font-bold text-slate-600 cursor-pointer select-none">Rămâi logat</label>
                 </div>
 
-                <button onclick="handleLogin()" class="w-full bg-blue-600 text-white p-4 rounded-xl font-black hover:bg-blue-700 transition tracking-wide uppercase text-sm">Conectare</button>
+                <button onclick="handleLogin()" class="w-full bg-blue-600 text-white p-4 rounded-xl font-black hover:bg-blue-700 transition tracking-wide active:scale-95">CONECTARE</button>
                 <div class="flex justify-between pt-2">
-                    
-                    <button onclick="showAuth('reset')" class="text-slate-500 text-xs md:text-sm font-bold hover:underline">Resetare parolă</button>
+                    <button onclick="showAuth('reg')" class="text-blue-600 text-sm font-bold hover:underline">Cont nou</button>
+                    <button onclick="showAuth('reset')" class="text-slate-500 text-sm font-bold hover:underline">Resetare parolă</button>
                 </div>
             </div>
 
@@ -79,7 +83,7 @@
                 <input type="text" id="reset-user" placeholder="Utilizator" class="w-full p-3 border-2 border-slate-300 rounded-lg font-semibold">
                 <input type="password" id="reset-old-pass" placeholder="Parolă Veche" class="w-full p-3 border-2 border-slate-300 rounded-lg font-semibold">
                 <input type="password" id="reset-new-pass" placeholder="Parolă Nouă" class="w-full p-3 border-2 border-slate-300 rounded-lg font-semibold">
-                <button onclick="handleResetPassword()" class="w-full bg-orange-600 text-white p-4 rounded-xl font-black uppercase hover:bg-orange-700 transition">Actualizează Parola</button>
+                <button onclick="handleResetPassword()" class="w-full bg-orange-600 text-white p-4 rounded-xl font-black uppercase hover:bg-orange-700 transition active:scale-95">Actualizează Parola</button>
                 <button onclick="showAuth('login')" class="w-full text-sm text-slate-500 font-bold mt-2">Înapoi</button>
             </div>
 
@@ -98,88 +102,70 @@
                     <option value="TRANDAFIR GROSU PFA">8. TRANDAFIR GROSU PFA</option>
                     <option value="TRUST AGROSERV">9. TRUST AGROSERV</option>
                 </select>
-                
+                <button onclick="handleRegister()" class="w-full bg-green-600 text-white p-4 rounded-xl font-black uppercase active:scale-95">Creare Cont</button>
                 <button onclick="showAuth('login')" class="w-full text-sm text-slate-500 font-bold mt-2">Înapoi la logare</button>
             </div>
         </div>
     </div>
 
     <div id="app-section" class="hidden min-h-screen flex flex-col bg-slate-100 text-slate-900 no-print">
-        <nav class="bg-slate-800 text-white p-2 md:p-0 flex justify-between items-center shadow-lg">
-            <img src="https://i.ibb.co/6cM58dZH/20260302-184450.png" alt="Logo" class="h-10 md:h-16 object-contain">
-            <div class="flex items-center gap-2 md:gap-4">
-                <div class="text-right leading-none">
-                    <p id="nav-user-name" class="font-extrabold text-[10px] md:text-sm"></p>
-                    <p id="nav-user-info" class="text-[8px] md:text-[10px] text-blue-400 font-black uppercase tracking-widest"></p>
+        <nav class="bg-slate-800 text-white p-0 flex justify-between items-center shadow-lg sticky top-0 z-40 h-12">
+            <img src="https://i.ibb.co/6cM58dZH/20260302-184450.png" alt="Logo" class="h-8 md:h-12 object-contain ml-2">
+            <div class="flex items-center gap-3">
+                <div class="text-right leading-none hidden sm:block">
+                    <p id="nav-user-name" class="font-extrabold text-sm"></p>
+                    <p id="nav-user-info" class="text-[10px] text-blue-400 font-black uppercase tracking-widest"></p>
                 </div>
-                <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-700 px-3 py-2 rounded-lg font-black text-[10px] transition">IEȘIRE</button>
+                <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-700 px-3 py-2 rounded-lg font-black text-[10px] md:text-xs transition">IEȘIRE</button>
             </div>
         </nav>
 
-        <div class="bg-white border-b-2 flex shadow-sm overflow-x-auto" id="main-nav">
-            <button onclick="switchTab('tab-list')" id="btn-list" class="px-4 md:px-8 py-4 font-black border-b-4 border-blue-600 text-blue-600 whitespace-nowrap">LISTĂ FIȘE</button>
-            <button onclick="switchTab('tab-add')" id="btn-add" class="hidden px-4 md:px-8 py-4 font-black text-slate-500 hover:text-blue-600 transition whitespace-nowrap">ADĂUGARE / EDITARE</button>
-            <button onclick="switchTab('tab-users')" id="btn-users" class="hidden px-4 md:px-8 py-4 font-black text-slate-500 hover:text-blue-600 transition uppercase whitespace-nowrap">Utilizatori</button>
+        <div class="bg-white border-b-2 flex overflow-x-auto sticky top-[44px] md:top-[54px] z-30 shadow-sm no-scrollbar" id="main-nav">
+            <button onclick="switchTab('tab-list')" id="btn-list" class="flex-shrink-0 px-6 md:px-8 py-4 font-black border-b-4 border-blue-600 text-blue-600 text-sm md:text-base">LISTĂ FIȘE</button>
+            <button onclick="switchTab('tab-add')" id="btn-add" class="hidden flex-shrink-0 px-6 md:px-8 py-4 font-black text-slate-500 hover:text-blue-600 transition text-sm md:text-base">ADĂUGARE / EDITARE</button>
+            <button onclick="switchTab('tab-users')" id="btn-users" class="hidden flex-shrink-0 px-6 md:px-8 py-4 font-black text-slate-500 hover:text-blue-600 transition text-sm md:text-base uppercase">Utilizatori</button>
         </div>
 
-        <main class="flex-grow p-4 md:p-8">
+        <main class="flex-grow p-3 md:p-8">
             <div id="tab-list" class="tab-content active">
+                <input type="text" id="search-box" onkeyup="filterTable()" placeholder="Caută după nume, VIN, telefon..." class="w-full p-4 mb-6 border-2 border-slate-300 rounded-xl shadow-sm outline-none font-semibold focus:border-blue-500 transition text-sm md:text-base">
                 
-                <div id="admin-export-area" style="display: none;" class="hidden bg-white p-4 rounded-xl mb-6 border-2 border-blue-100 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-4">
-                    <div class="flex items-center gap-2 w-full md:w-auto">
-                        <span class="text-[10px] font-black uppercase text-blue-700">Export:</span>
-                        <select id="export-type" class="flex-grow md:flex-none p-2 border rounded font-bold text-xs bg-slate-50 outline-none" onchange="toggleExportDates()">
-                            <option value="all">Toate Fișele</option>
-                            <option value="period">Perioadă</option>
-                        </select>
-                    </div>
-                    <div id="export-dates" class="hidden flex items-center gap-2 w-full md:w-auto">
-                        <input type="date" id="exp-start" class="flex-grow md:flex-none p-2 border rounded font-bold text-xs">
-                        <span class="text-xs font-bold">-</span>
-                        <input type="date" id="exp-end" class="flex-grow md:flex-none p-2 border rounded font-bold text-xs">
-                    </div>
-                    <button onclick="exportToExcel()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-black text-xs uppercase transition flex justify-center items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Excel
-                    </button>
-                </div>
-
-                <input type="text" id="search-box" onkeyup="filterTable()" placeholder="Caută după nume, serie VIN..." class="w-full p-4 mb-6 border-2 border-slate-300 rounded-xl shadow-sm outline-none font-semibold focus:border-blue-500 transition text-sm">
                 <div class="bg-white rounded-2xl shadow-xl overflow-x-auto border border-slate-200">
                     <table class="w-full text-left min-w-[700px]">
-                        <thead class="bg-slate-200 text-slate-800 uppercase text-[10px] md:text-[11px] font-black tracking-widest">
+                        <thead class="bg-slate-200 text-slate-800 uppercase text-[10px] font-black tracking-widest">
                             <tr id="table-head-row"></tr>
                         </thead>
-                        <tbody id="fise-rows" class="divide-y divide-slate-200 hover:[&>tr]:bg-blue-50 cursor-pointer"></tbody>
+                        <tbody id="fise-rows" class="divide-y divide-slate-200 hover:[&>tr]:bg-blue-50 cursor-pointer text-sm"></tbody>
                     </table>
                 </div>
             </div>
 
             <div id="tab-users" class="tab-content max-w-6xl mx-auto">
-                <h2 class="text-xl md:text-2xl font-black mb-6 text-slate-800 uppercase italic text-center md:text-left">Gestionare Utilizatori</h2>
+                <h2 class="text-xl font-black mb-4 text-slate-800 uppercase italic">Utilizatori Sistem</h2>
                 <div class="bg-white rounded-2xl shadow-xl overflow-x-auto border border-slate-200">
                     <table class="w-full text-left min-w-[600px]">
-                        <thead class="bg-slate-800 text-white uppercase text-[10px] md:text-[11px] font-black tracking-widest">
+                        <thead class="bg-slate-800 text-white uppercase text-[10px] font-black tracking-widest">
                             <tr>
-                                <th class="p-4 md:p-5">Nume</th>
-                                <th class="p-4 md:p-5">Username</th>
-                                <th class="p-4 md:p-5">Service</th>
-                                <th class="p-4 md:p-5">Rol</th>
-                                <th class="p-4 md:p-5 text-center">Acțiuni</th>
+                                <th class="p-4">Nume Prenume</th>
+                                <th class="p-4">Username</th>
+                                <th class="p-4">Service</th>
+                                <th class="p-4">Rol</th>
+                                <th class="p-4 text-center">Acțiuni</th>
                             </tr>
                         </thead>
-                        <tbody id="users-rows" class="divide-y divide-slate-200"></tbody>
+                        <tbody id="users-rows" class="divide-y divide-slate-200 text-sm"></tbody>
                     </table>
                 </div>
             </div>
 
             <div id="tab-add" class="tab-content max-w-6xl mx-auto">
-                <div id="edit-indicator" class="hidden bg-amber-100 text-amber-900 p-3 rounded-lg mb-4 font-black text-center border-2 border-amber-400 uppercase text-[10px]">
-                    Mod EDITARE activ pentru fișa <span id="edit-id-display"></span>. 
-                    <button onclick="cancelEdit()" class="underline ml-4 text-red-700">Anulează</button>
+                <div id="edit-indicator" class="hidden bg-amber-100 text-amber-900 p-3 rounded-lg mb-4 font-black text-center border-2 border-amber-400 uppercase text-[10px] md:text-xs">
+                    Mod EDITARE activ: <span id="edit-id-display"></span>. 
+                    <button onclick="cancelEdit()" class="underline ml-4 text-red-700">ANULEAZĂ</button>
                 </div>
-                <form id="form-fisa-noua" class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 border border-slate-200">
+                <form id="form-fisa-noua" class="bg-white p-5 md:p-8 rounded-2xl shadow-2xl grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 border border-slate-200">
                     <input type="hidden" id="edit-fisa-id">
+                    
                     <div class="space-y-4">
                         <h3 class="font-black text-blue-700 border-b-2 border-blue-100 pb-2 uppercase text-[10px] italic tracking-wider">1. Date Client</h3>
                         <input type="text" id="c-nume" placeholder="Nume Prenume" class="w-full p-3 border-2 border-slate-200 rounded-lg font-semibold text-sm" required>
@@ -200,31 +186,31 @@
                                 <option value="Tricicleta electrica">Tricicletă Electrică</option>
                                 <option value="Scuter electric">Scuter Electric</option>
                                 <option value="Cvadraciclu electric">Cvadraciclu Electric</option>
-                                <option value="Alta">Alta</option>
+                                <option value="Alta">Alta (Specificați mai jos)</option>
                             </select>
-                            <input type="text" id="p-cat-alt" placeholder="Specificați categoria..." class="hidden w-full p-3 border-2 border-blue-400 rounded-lg font-bold bg-blue-50 text-blue-900 text-sm">
+                            <input type="text" id="p-cat-alt" placeholder="Introduceți categoria..." class="hidden w-full p-3 border-2 border-blue-400 rounded-lg font-bold bg-blue-50 text-blue-900 text-sm">
                         </div>
                         <input type="text" id="p-vin" placeholder="Serie VIN" class="w-full p-3 border-2 border-slate-200 rounded-lg font-mono font-black uppercase text-blue-800 text-sm">
                         <input type="text" id="p-mod" placeholder="Marcă / Model" class="w-full p-3 border-2 border-slate-200 rounded-lg font-semibold text-sm">
-                        <div class="flex gap-2">
-                            <input type="text" id="p-fact" placeholder="Emitent/Factură" class="w-1/2 p-3 border-2 border-slate-200 rounded-lg text-xs font-bold">
-                            <input type="date" id="p-dfact" class="w-1/2 p-3 border-2 border-slate-200 rounded-lg text-xs font-bold">
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="p-fact" placeholder="Emitent/Factură" class="w-full sm:w-1/2 p-3 border-2 border-slate-200 rounded-lg text-xs font-bold">
+                            <input type="date" id="p-dfact" class="w-full sm:w-1/2 p-3 border-2 border-slate-200 rounded-lg text-xs font-bold">
                         </div>
                         <select id="p-gar" class="w-full p-3 border-2 border-slate-200 rounded-lg text-sm font-bold">
                             <option value="In garantie">În Garanție</option>
                             <option value="Post garantie">Post Garanție</option>
                         </select>
-                        <input type="text" id="p-obs-produs" placeholder="Observații" class="w-full p-3 border-2 border-slate-200 rounded-lg text-xs font-semibold">
+                        <input type="text" id="p-obs-produs" placeholder="Observații (Accesorii, starea etc.)" class="w-full p-3 border-2 border-slate-200 rounded-lg text-xs font-semibold">
                         <div>
-                            <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Data Preluării</label>
+                            <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Data Predării Fizice</label>
                             <input type="date" id="p-dprel" class="w-full p-3 border-2 border-slate-200 rounded-lg text-sm font-bold">
                         </div>
                     </div>
 
                     <div class="space-y-4">
-                        <h3 class="font-black text-blue-700 border-b-2 border-blue-100 pb-2 uppercase text-[10px] italic tracking-wider">3. Reclamație</h3>
-                        <textarea id="p-rec" placeholder="Defecte sesizate..." class="w-full p-3 border-2 border-slate-200 rounded-lg h-32 md:h-48 outline-none font-semibold focus:border-blue-500 text-sm" required></textarea>
-                        <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white p-4 md:p-5 rounded-2xl font-black text-base md:text-lg hover:bg-blue-700 uppercase shadow-lg transition">Salvează Fișa</button>
+                        <h3 class="font-black text-blue-700 border-b-2 border-blue-100 pb-2 uppercase text-[10px] italic tracking-wider">3. Reclamație Client</h3>
+                        <textarea id="p-rec" placeholder="Introduceți defectele sesizate..." class="w-full p-3 border-2 border-slate-200 rounded-lg h-32 md:h-48 outline-none font-semibold focus:border-blue-500 text-sm" required></textarea>
+                        <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white p-4 md:p-5 rounded-2xl font-black text-base md:text-lg hover:bg-blue-700 uppercase shadow-lg transition active:scale-95">Salvează Fișa</button>
                     </div>
                 </form>
             </div>
@@ -232,21 +218,20 @@
     </div>
 
     <div id="modal-view" class="fixed inset-0 bg-black/90 hidden z-50 overflow-y-auto p-2 md:p-4">
-        <div class="max-w-[210mm] mx-auto mb-4 flex flex-wrap gap-2 justify-between items-center bg-slate-800 p-3 md:p-4 rounded-xl no-print">
+        <div class="max-w-[210mm] mx-auto mb-4 flex flex-wrap gap-2 justify-between items-center bg-slate-800 p-3 rounded-xl no-print">
             <div class="flex flex-wrap gap-2">
-                
-                <button id="admin-edit-btn" onclick="startEdit()" class="hidden bg-amber-500 text-white px-3 md:px-4 py-2 rounded-lg font-black text-[10px] uppercase">Editează</button>
-                <button id="admin-delete-btn" onclick="deleteFisa()" class="hidden bg-red-600 text-white px-3 md:px-4 py-2 rounded-lg font-black text-[10px] uppercase">Șterge</button>
+                <button id="admin-edit-btn" onclick="startEdit()" class="hidden bg-amber-500 text-white px-3 md:px-4 py-2 rounded-lg font-black text-[10px] uppercase active:scale-95">Editează</button>
+                <button id="admin-delete-btn" onclick="deleteFisa()" class="hidden bg-red-600 text-white px-3 md:px-4 py-2 rounded-lg font-black text-[10px] uppercase active:scale-95">Șterge</button>
             </div>
             <button onclick="closeModal()" class="bg-slate-700 text-white px-4 py-2 rounded-lg font-black text-[10px] uppercase">Închide</button>
         </div>
-        <div id="a4-content" class="a4-page rounded-sm overflow-x-hidden">
+        <div id="a4-content" class="a4-page rounded-sm overflow-hidden">
              <div id="v-render-area" class="h-full flex flex-col"></div>
         </div>
     </div>
 
     <script>
-         const SUPA_URL = "https://chsuqecaqhnjqmmuwfhl.supabase.co";
+        const SUPA_URL = "https://chsuqecaqhnjqmmuwfhl.supabase.co";
         const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoc3VxZWNhcWhuanFtbXV3ZmhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDQ4NDMsImV4cCI6MjA4ODAyMDg0M30.CRMlqol-pl3DSBSBvpm04PLkSjE9lja3c1JnKnLrWvs";
         const _supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
@@ -255,8 +240,12 @@
 
         function getRoTime() {
             const now = new Date();
-            const roStr = now.toLocaleString("sv-SE", { timeZone: "Europe/Bucharest" }); 
-            return roStr.substring(0, 16).replace(" ", "T");
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
         }
 
         window.onload = () => {
@@ -277,40 +266,31 @@
             const u = (storedU || document.getElementById('l-user').value).trim();
             const p = (storedP || document.getElementById('l-pass').value).trim();
             const remember = document.getElementById('l-remember').checked;
-
             if(!u || !p) return;
-
             const { data } = await _supa.from('profiles').select('*').ilike('username', u).eq('password', p).maybeSingle();
-            
             if (data) {
                 activeUser = data;
                 if (remember) localStorage.setItem('geeli_session', JSON.stringify({u, p}));
-
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('app-section').classList.remove('hidden');
                 document.getElementById('nav-user-name').innerText = data.nume_complet;
                 document.getElementById('nav-user-info').innerText = `${data.rol} | ${data.service}`;
-                
                 if(data.rol === 'admin') {
-                    document.getElementById('btn-add').classList.remove('hidden');
-                    document.getElementById('btn-users').classList.remove('hidden');
-                    document.getElementById('admin-export-area').classList.remove('hidden');
-                }
-                
+                document.getElementById('btn-add').classList.remove('hidden');
+                document.getElementById('btn-users').classList.remove('hidden');
+}
                 document.getElementById('c-data-auto').value = getRoTime();
-                
                 const hRow = document.getElementById('table-head-row');
-                hRow.innerHTML = (activeUser.rol === 'admin' ? '<th class="p-4 md:p-5">Nr.Crt.</th>' : '') + `
-                    <th class="p-4 md:p-5">ID Fișă</th>
-                    <th class="p-4 md:p-5">Client / Contact</th>
-                    <th class="p-4 md:p-5">Produs / VIN</th>
-                    <th class="p-4 md:p-5">Vechime</th>
-                    <th class="p-4 md:p-5">Status</th>
-                    <th class="p-4 md:p-5">Service Alocat</th>`;
-                
+                hRow.innerHTML = (activeUser.rol === 'admin' ? '<th class="p-4">#</th>' : '') + `
+                    <th class="p-4">ID Fișă</th>
+                    <th class="p-4">Client / Contact</th>
+                    <th class="p-4">Produs / VIN</th>
+                    <th class="p-4">Vechime</th>
+                    <th class="p-4">Status</th>
+                    <th class="p-4">Service</th>`;
                 loadFise();
             } else { 
-                if(!storedU) alert("Date de conectare incorecte!"); 
+                if(!storedU) alert("Date incorecte!"); 
                 else localStorage.removeItem('geeli_session');
             }
         }
@@ -319,24 +299,16 @@
             const u = document.getElementById('reset-user').value.trim();
             const oldP = document.getElementById('reset-old-pass').value.trim();
             const newP = document.getElementById('reset-new-pass').value.trim();
-
-            if(!u || !oldP || !newP) {
-                alert("Completați toate datele!");
-                return;
-            }
-
+            if(!u || !oldP || !newP) return alert("Completați toate datele!");
             const { data: profile } = await _supa.from('profiles').select('id').ilike('username', u).eq('password', oldP).maybeSingle();
-
             if (profile) {
                 await _supa.from('profiles').update({ password: newP }).eq('id', profile.id);
                 alert("Parola a fost actualizată!");
                 showAuth('login');
-            } else {
-                alert("Utilizator sau parolă veche incorectă!");
-            }
+            } else alert("Utilizator sau parolă incorectă!");
         }
 
-         function handleLogout() {
+             function handleLogout() {
     // Șterge sesiunea salvată pentru a forța delogarea
     localStorage.removeItem('geeli_session');
     
@@ -345,15 +317,24 @@
 }
 
         async function handleRegister() {
+            const nume = document.getElementById('r-full').value.trim();
+            const user = document.getElementById('r-user').value.trim();
+            const pass = document.getElementById('r-pass').value.trim();
+            const serv = document.getElementById('r-service').value;
+            if (!nume || !user || !pass) return alert("Toate câmpurile sunt obligatorii!");
             const profile = {
-                nume_complet: document.getElementById('r-full').value,
-                username: document.getElementById('r-user').value,
-                password: document.getElementById('r-pass').value,
-                service: document.getElementById('r-service').value,
-                rol: (document.getElementById('r-user').value.toLowerCase().includes('admin')) ? 'admin' : 'user'
+                nume_complet: nume,
+                username: user,
+                password: pass,
+                service: serv,
+                rol: (user.toLowerCase().includes('admin')) ? 'admin' : 'none'
             };
-            await _supa.from('profiles').insert([profile]);
-            showAuth('login');
+            const { error } = await _supa.from('profiles').insert([profile]);
+            if (error) alert("Eroare: " + error.message);
+            else {
+                alert("Cont creat! Așteptați activarea.");
+                showAuth('login');
+            }
         }
 
         async function loadUsers() {
@@ -362,61 +343,64 @@
             const body = document.getElementById('users-rows');
             body.innerHTML = '';
             data?.forEach(u => {
-                body.innerHTML += `<tr class="border-b border-slate-100 hover:bg-slate-50 transition">
-                    <td class="p-4 md:p-5 font-black text-slate-900 text-xs md:text-sm">${u.nume_complet}</td>
-                    <td class="p-4 md:p-5 font-mono font-bold text-blue-600 text-xs md:text-sm">${u.username}</td>
-                    <td class="p-4 md:p-5 text-[10px] md:text-sm font-bold text-slate-700">${u.service}</td>
-                    <td class="p-4 md:p-5">
-                        <span class="px-2 py-1 rounded text-[8px] md:text-[10px] font-black uppercase ${u.rol==='admin'?'bg-purple-600 text-white':'bg-slate-400 text-white'}">${u.rol}</span>
+                body.innerHTML += `<tr class="border-b border-slate-100 hover:bg-slate-50">
+                    <td class="p-4 font-black text-slate-900">${u.nume_complet}</td>
+                    <td class="p-4 font-mono font-bold text-blue-600">${u.username}</td>
+                    <td class="p-4 text-xs font-bold text-slate-700">${u.service}</td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 rounded text-[9px] font-black uppercase text-white 
+                        ${u.rol === 'admin' ? 'bg-red-600' : (u.rol === 'user' ? 'bg-green-600' : 'bg-slate-500')}">
+                        ${u.rol || 'none'}
+                        </span>
                     </td>
-                    <td class="p-4 md:p-5 text-center flex gap-2 justify-center">
+                    <td class="p-4 text-center flex gap-2 justify-center">
                         ${u.username !== activeUser.username ? `
-                            <button onclick="toggleUserRole('${u.id}', '${u.rol}')" class="bg-blue-100 text-blue-600 px-2 py-1 rounded-lg font-black text-[8px] md:text-[10px] hover:bg-blue-600 hover:text-white transition">ROL</button>
-                            <button onclick="deleteUser('${u.username}')" class="bg-red-100 text-red-600 px-2 py-1 rounded-lg font-black text-[8px] md:text-[10px] hover:bg-red-600 hover:text-white transition">X</button>
-                        ` : '<span class="text-[8px] italic text-slate-400">Activ</span>'}
+                            <button onclick="toggleUserRole('${u.id}', '${u.rol}')" class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-black text-[9px]">ROL</button>
+                            <button onclick="deleteUser('${u.username}')" class="bg-red-100 text-red-600 px-2 py-1 rounded font-black text-[9px]">ȘTERGE</button>
+                        ` : '<span class="text-[9px] italic text-slate-400">Activ</span>'}
                     </td>
                 </tr>`;
             });
         }
 
         async function toggleUserRole(id, currentRole) {
-            const newRole = currentRole === 'admin' ? 'user' : 'admin';
-            if(confirm(`Schimbi rolul utilizatorului în "${newRole.toUpperCase()}"?`)) {
+            let newRole = (currentRole === 'none' || !currentRole) ? 'user' : (currentRole === 'user' ? 'admin' : 'none');
+            if(confirm(`Schimbi accesul în: ${newRole.toUpperCase()}?`)) {
                 await _supa.from('profiles').update({ rol: newRole }).eq('id', id);
                 loadUsers();
             }
         }
 
         async function deleteUser(username) {
-            if(confirm(`Ești sigur că vrei să ștergi utilizatorul "${username}"?`)) {
+            if(confirm(`Ștergi utilizatorul "${username}"?`)) {
                 await _supa.from('profiles').delete().eq('username', username);
                 loadUsers();
             }
         }
 
         async function loadFise() {
+            if(activeUser.rol === 'none') {
+                document.getElementById('fise-rows').innerHTML = '<tr><td colspan="7" class="p-10 text-center font-black text-red-600 uppercase">Cont neactivat.</td></tr>';
+                return;
+            }
             let q = _supa.from('fise').select('*');
             if(activeUser.rol !== 'admin') q = q.eq('alocat_catre', activeUser.service);
-            
             const { data } = await q.order('created_at', { ascending: true });
             if(!data) return;
-
             const displayData = [...data].reverse();
             const body = document.getElementById('fise-rows');
             body.innerHTML = '';
-            
             displayData.forEach((f) => {
                 const nrCrt = data.findIndex(x => x.id === f.id) + 1;
                 const vch = calcVechime(f.data_preluare_fizica);
-                
                 body.innerHTML += `<tr onclick='openFisa(${JSON.stringify(f)})' class="border-b border-slate-100">
-                    ${activeUser.rol === 'admin' ? `<td class="p-4 md:p-5 font-black text-slate-400 text-[10px] md:text-xs">#${nrCrt}</td>` : ''}
-                    <td class="p-4 md:p-5 font-mono font-black text-blue-700 text-xs md:text-sm">${f.id}</td>
-                    <td class="p-4 md:p-5 font-black text-slate-900 text-xs md:text-sm">${f.nume_client}</td>
-                    <td class="p-4 md:p-5 text-[10px] md:text-xs font-bold text-slate-800">${f.marca_model}<br><span class="text-blue-600 font-black uppercase">${f.vin_produs}</span></td>
-                    <td class="p-4 md:p-5 text-[9px] md:text-[11px] font-black ${vch.color}">${vch.text}</td>
-                    <td class="p-4 md:p-5"><span class="px-2 md:px-3 py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase ${f.status==='Finalizat'?'bg-green-600 text-white':'bg-amber-500 text-white'}">${f.status}</span></td>
-                    <td class="p-4 md:p-5 text-[8px] md:text-[10px] font-black text-slate-700 italic">${f.alocat_catre}</td>
+                    ${activeUser.rol === 'admin' ? `<td class="p-4 font-black text-slate-400 text-xs">${nrCrt}</td>` : ''}
+                    <td class="p-4 font-mono font-black text-blue-700 text-xs">${f.id}</td>
+                    <td class="p-4 font-black text-slate-900">${f.nume_client}</td>
+                    <td class="p-4 text-xs font-bold text-slate-800">${f.marca_model}<br><span class="text-blue-600 font-black uppercase text-[10px]">${f.vin_produs}</span></td>
+                    <td class="p-4 text-[10px] font-black ${vch.color}">${vch.text}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${f.status==='Finalizat'?'bg-green-600 text-white':'bg-amber-500 text-white'}">${f.status}</span></td>
+                    <td class="p-4 text-[9px] font-black text-slate-700 italic">${f.alocat_catre}</td>
                 </tr>`;
             });
         }
@@ -425,7 +409,7 @@
             if(!dateStr) return { text: "-", color: "text-slate-400" };
             const diff = Math.floor((new Date() - new Date(dateStr)) / 86400000);
             return {
-                text: diff <= 14 ? `${diff} ZILE` : `${diff} ZILE (DEPĂȘIT)`,
+                text: diff <= 14 ? `${diff} ZILE (OK)` : `${diff} ZILE (DEPĂȘIT)`,
                 color: diff <= 14 ? "text-green-700" : "text-red-700"
             };
         }
@@ -433,14 +417,8 @@
         function toggleAltCategorie() {
             const sel = document.getElementById('p-cat').value;
             const inputAlt = document.getElementById('p-cat-alt');
-            if(sel === 'Alta') {
-                inputAlt.classList.remove('hidden');
-                inputAlt.required = true;
-            } else {
-                inputAlt.classList.add('hidden');
-                inputAlt.required = false;
-                inputAlt.value = '';
-            }
+            if(sel === 'Alta') { inputAlt.classList.remove('hidden'); inputAlt.required = true; }
+            else { inputAlt.classList.add('hidden'); inputAlt.required = false; inputAlt.value = ''; }
         }
 
         document.getElementById('form-fisa-noua').onsubmit = async (e) => {
@@ -464,9 +442,8 @@
                 data_preluare_fizica: document.getElementById('p-dprel').value,
                 reclamatie_client: document.getElementById('p-rec').value
             };
-            if (editId) {
-                await _supa.from('fise').update(fisa).eq('id', editId);
-            } else {
+            if (editId) await _supa.from('fise').update(fisa).eq('id', editId);
+            else {
                 const dateStr = new Date().toISOString().slice(2,10).replace(/-/g,'');
                 fisa.id = dateStr + Math.floor(Math.random()*100).toString().padStart(3,'0');
                 fisa.status = 'În lucru';
@@ -517,7 +494,7 @@
         }
 
         async function deleteFisa() {
-            if(confirm("Ești sigur că vrei să ștergi această fișă definitiv?")) {
+            if(confirm("Ștergi definitiv această fișă?")) {
                 await _supa.from('fise').delete().eq('id', currentFisa.id);
                 closeModal(); loadFise();
             }
@@ -530,100 +507,103 @@
             document.getElementById('admin-delete-btn').classList.toggle('hidden', activeUser.rol !== 'admin');
             const vch = calcVechime(f.data_preluare_fizica);
             const canEditReport = (activeUser.rol === 'admin' || (activeUser.service === f.alocat_catre && f.status === 'În lucru'));
-            
             const isPropriuType = (f.alocat_catre === 'Propriu' || f.alocat_catre === 'Ridicare1' || f.alocat_catre === 'Ridicare2' || f.alocat_catre === 'Ridicare3');
 
             document.getElementById('v-render-area').innerHTML = `
                 <div class="flex-grow">
-                    <div class="mb-1 -mt-4"><img src="https://i.ibb.co/DfD2pcmk/20260302-184328.png" alt="Antet" class="max-w-[140px] md:max-w-[180px] h-auto object-contain"></div>
+                    <div class="mb-1 -mt-4"><img src="https://i.ibb.co/DfD2pcmk/20260302-184328.png" alt="Antet" class="max-w-[150px] md:max-w-[180px] h-auto object-contain"></div>
                     <div class="flex justify-between border-b-4 md:border-b-8 border-slate-900 pb-4 md:pb-6 mb-2">
-                        <div><h1 class="text-xl md:text-2xl font-black italic tracking-tighter uppercase text-slate-900">Fișă Service</h1><p class="font-mono text-sm md:text-lg text-blue-700 font-black">#${f.id}</p></div>
+                        <div><h1 class="text-xl md:text-2xl font-black italic uppercase text-slate-900">Fișă Service</h1><p class="font-mono text-sm md:text-lg text-blue-700 font-black">#${f.id}</p></div>
                         <div class="text-right">
-                            <p class="font-black px-4 md:px-6 py-1 md:py-2 rounded text-white uppercase mb-1 md:mb-2 text-[10px] md:text-sm shadow-md ${f.status==='Finalizat'?'bg-green-600':'bg-amber-500'}">${f.status}</p>
+                            <p class="font-black px-4 py-1 md:px-6 md:py-2 rounded text-white uppercase mb-1 text-[10px] md:text-sm shadow-md ${f.status==='Finalizat'?'bg-green-600':'bg-amber-500'}">${f.status}</p>
                             <p class="text-[9px] md:text-[11px] font-black ${vch.color}">${vch.text}</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 text-[11px] md:text-[13px] mb-6 md:mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 text-[11px] md:text-[13px] mb-6">
                         <div class="space-y-1 md:space-y-2">
                             <h4 class="font-black border-b-2 border-slate-900 text-slate-900 uppercase text-[9px] md:text-[11px] pb-1 tracking-widest">1. Date Client</h4>
-                            <p><b class="font-black">NUME:</b> ${f.nume_client}</p>
-                            <p><b class="font-black">TEL:</b> ${f.tel_client || '-'}</p>
-                            <p><b class="font-black">EMAIL:</b> ${f.email_client || '-'}</p>
-                            <p><b class="font-black">ADRESA:</b> ${f.adresa_client || '-'}</p>
-                            <p><b class="font-black">DATA ÎNREG.:</b> ${f.created_at ? new Date(f.created_at).toLocaleString('ro-RO') : '-'}</p>
+                            <p><b>NUME:</b> ${f.nume_client}</p>
+                            <p><b>TEL:</b> ${f.tel_client || '-'}</p>
+                            <p><b>EMAIL:</b> ${f.email_client || '-'}</p>
+                            <p><b>ADRESA:</b> ${f.adresa_client || '-'}</p>
+                            <p><b>DATA ÎNREG.:</b> ${f.created_at ? new Date(f.created_at).toLocaleString('ro-RO') : '-'}</p>
                         </div>
                         <div class="space-y-1 md:space-y-2">
                             <h4 class="font-black border-b-2 border-slate-900 text-slate-900 uppercase text-[9px] md:text-[11px] pb-1 tracking-widest">2. Date Produs</h4>
-                            <p><b class="font-black">CATEGORIE:</b> ${f.categorie}</p>
-                            <p><b class="font-black">MODEL:</b> ${f.marca_model}</p>
-                            <p><b class="font-black">VIN:</b> <span class="text-blue-700 font-black uppercase font-mono">${f.vin_produs}</span></p>
+                            <p><b>CATEGORIE:</b> ${f.categorie}</p>
+                            <p><b>MODEL:</b> ${f.marca_model}</p>
+                            <p><b>VIN:</b> <span class="text-blue-700 font-black uppercase font-mono">${f.vin_produs}</span></p>
                             <p><b class="font-black">EMITENT/FACTURĂ:</b> ${f.nr_factura || '-'} / ${f.data_factura ? f.data_factura.split('-').reverse().join('-') : '-'}</p>
-                            <p><b class="font-black">GARANȚIE:</b> ${f.tip_garantie}</p>
-                            <p><b class="font-black">OBS:</b> ${f.obs_produs || '-'}</p>
+                            <p><b>GARANȚIE:</b> ${f.tip_garantie}</p>
+                            <p><b class="font-black">OBSERVAȚII:</b> ${f.obs_produs || '-'}</p>
                             <p><b class="font-black text-red-700">DATA PREDĂRII FIZICE:</b> ${f.data_preluare_fizica ? f.data_preluare_fizica.split('-').reverse().join('-') : '-'}</p>
                         </div>
                     </div>
-                    <div class="bg-slate-100 p-3 border-2 border-slate-200 italic mb-3 text-[11px] md:text-[13px] text-slate-900 rounded-lg">
+                    <div class="bg-slate-100 p-2 md:p-3 border-2 border-slate-200 italic mb-3 text-[11px] md:text-[13px] text-slate-900 rounded-lg">
                         <h4 class="font-black uppercase text-[9px] md:text-[11px] mb-2 border-b-2 border-slate-300 pb-1">3. Reclamație Client:</h4>
-                        <div class="font-bold leading-relaxed">${f.reclamatie_client}</div>
+                        <div class="font-bold leading-relaxed whitespace-pre-wrap">${f.reclamatie_client}</div>
                     </div>
                     <div class="border-t-2 md:border-t-4 border-slate-900 pt-4 md:pt-6">
-                        <h4 class="font-black bg-slate-900 text-white px-4 py-1 text-[9px] md:text-[11px] inline-block mb-1 uppercase tracking-widest">Raport Tehnic Service</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-6 text-[10px] md:text-[12px] font-black mb-4 md:mb-6 border-b pb-4 border-slate-100">
-                            <p class="text-slate-700">ALOCAT: <span class="text-blue-700">${f.alocat_catre}</span></p>
-                            <p class="text-slate-700">TEHNICIAN: <span class="text-blue-700">${f.tehnician || '-'}</span></p>
-                            ${isPropriuType ? `<p class="text-slate-700">KM/ORE: <span class="text-blue-700">${f.km || '-'}/${f.ore || '-'}</span></p>` : `<p class="text-slate-700">COST: <span class="text-blue-700">${f.cost || '-'}</span> | FACT: <span class="text-blue-700">${f.emitent_factura_service || '-'}</span></p>`}
+                        <h4 class="font-black bg-slate-900 text-white px-3 py-1 text-[9px] md:text-[11px] inline-block mb-1 uppercase tracking-widest">Raport Tehnic Service</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-6 text-[10px] md:text-[12px] font-black mb-4 border-b pb-2 border-slate-100">
+                            <p>ALOCAT: <span class="text-blue-700">${f.alocat_catre}</span></p>
+                            <p>TEHNICIAN: <span class="text-blue-700">${f.tehnician || '-'}</span></p>
+                            ${isPropriuType ? `<p>KM/ORE: <span class="text-blue-700">${f.km || '-'}/${f.ore || '-'}</span></p>` : `<p>COST: <span class="text-blue-700">${f.cost || '-'}</span></p>`}
                         </div>
-                        <div class="p-4 md:p-6 border-2 border-slate-100 bg-blue-50/30 text-[11px] md:text-[13px] font-bold text-slate-900 min-h-[100px] whitespace-pre-wrap rounded-xl">${f.raport_reparatie || 'Diagnosticare și lucrare în curs...'}</div>
+                <div class="p-2 md:p-4 border-2 border-slate-100 bg-blue-50/30 text-[11px] md:text-[13px] font-bold text-slate-900 min-h-[40px] whitespace-pre-line rounded-xl">${f.raport_reparatie ? f.raport_reparatie.trim() : 'Diagnosticare în curs...'}</div>
                     </div>
                 </div>
-                <div class="mt-4 flex justify-between px-4 md:px-10 text-[9px] md:text-[11px] font-black uppercase text-slate-900"><div class="text-center"><p class="mb-4 italic">Semnătură Client</p><div class="w-32 md:w-48 border-b-2 border-slate-900 border-dotted mx-auto"></div></div><div class="text-center"><p class="mb-4 italic">Reprezentant Service</p><div class="w-32 md:w-48 border-b-2 border-slate-900 border-dotted mx-auto"></div></div></div>
-                <div class="mt-auto pt-4 text-[9px] md:text-[11px] leading-tight text-slate-400 italic text-center border-t border-slate-100">Datele sunt prelucrate conform GDPR (UE) 2016/679.</div>
-                <div class="mt-8 no-print pt-6 border-t-2 border-dashed border-slate-300 space-y-4">
+                <div class="mt-4 flex justify-between px-4 md:px-10 text-[9px] md:text-[11px] font-black uppercase text-slate-900">
+                    <div class="text-center"><p class="mb-2 italic">Semnătură Client</p><div class="w-24 md:w-48 border-b border-slate-900 border-dotted mx-auto"></div></div>
+                    <div class="text-center"><p class="mb-2 italic">Reprezentant Service</p><div class="w-24 md:w-48 border-b border-slate-900 border-dotted mx-auto"></div></div>
+                </div>
+                <div class="mt-auto pt-4 text-[12px] leading-tight text-slate-400 italic text-center border-t border-slate-100">Notă: Datele cu caracter personal din acest document sunt prelucrate în conformitate cu prevederile Regulamentului (UE) 2016/679 (GDPR). Prin semnarea/transmiterea acestui document, vă exprimați acordul pentru prelucrarea datelor în scopul prestării serviciilor.</div>
+                <div class="mt-8 no-print pt-4 border-t-2 border-dashed border-slate-300 space-y-4">
                     ${activeUser.rol === 'admin' ? `
-                        <div class="bg-slate-200 p-4 md:p-5 rounded-2xl flex flex-col md:flex-row gap-4 items-start md:items-center border border-slate-300 shadow-inner">
-                            <span class="text-[10px] font-black uppercase text-slate-800">Alocare / Status:</span>
-                            <select id="sel-aloca" class="w-full md:flex-grow p-2 border-2 border-slate-300 rounded-lg font-black text-[10px] bg-white">
-                                <option value="${f.alocat_catre}">${f.alocat_catre}</option>
-                                <option value="Propriu">1. Service Propriu</option>
-                                <option value="Ridicare1">2. RIDICARE1</option>
-                                <option value="Ridicare2">3. RIDICARE2</option>
-                                <option value="Ridicare3">4. RIDICARE3</option>
-                                <option value="BUXI PROFESIONAL">5. BUXI PROFESIONAL</option>
-                                <option value="MIXX MOTION">6. MIXX MOTION</option>
-                                <option value="PGC GRAND TOTAL">7. PGC GRAND TOTAL</option>
-                                <option value="TRANDAFIR GROSU PFA">8. TRANDAFIR GROSU PFA</option>
-                                <option value="TRUST AGROSERV">9. TRUST AGROSERV</option>
-                            </select>
-                            <select id="sel-status-admin" class="w-full md:w-auto p-2 border-2 border-slate-300 rounded-lg font-black text-[10px] bg-white">
-                                <option value="În lucru" ${f.status==='În lucru'?'selected':''}>În lucru</option>
-                                <option value="Finalizat" ${f.status==='Finalizat'?'selected':''}>Finalizat</option>
-                            </select>
-                            <button onclick="saveAlocare()" class="w-full md:w-auto bg-blue-600 text-white px-6 py-2 rounded-xl font-black text-[10px] uppercase hover:bg-blue-700 transition shadow-lg">Update</button>
+                        <div class="bg-slate-200 p-4 rounded-xl flex flex-col gap-3 shadow-inner">
+                            <span class="text-[10px] font-black uppercase text-slate-800">Alocare & Status (ADMIN):</span>
+                            <div class="flex gap-2">
+                                <select id="sel-aloca" class="flex-grow p-2 border-2 border-slate-300 rounded-lg font-black text-[10px] bg-white">
+                                    <option value="${f.alocat_catre}">${f.alocat_catre}</option>
+                                    <option value="Propriu">1. Service Propriu</option>
+                                    <option value="Ridicare1">2. RIDICARE1</option>
+                                    <option value="Ridicare2">3. RIDICARE2</option>
+                                    <option value="Ridicare3">4. RIDICARE3</option>
+                                    <option value="BUXI PROFESIONAL">5. BUXI PROFESIONAL</option>
+                                    <option value="MIXX MOTION">6. MIXX MOTION</option>
+                                    <option value="PGC GRAND TOTAL">7. PGC GRAND TOTAL</option>
+                                    <option value="TRANDAFIR GROSU PFA">8. TRANDAFIR GROSU PFA</option>
+                                    <option value="TRUST AGROSERV">9. TRUST AGROSERV</option>
+                                </select><br>
+                                <select id="sel-status-admin" class="p-2 border-2 border-slate-300 rounded-lg font-black text-[10px] bg-white">
+                                    <option value="În lucru" ${f.status==='În lucru'?'selected':''}>În lucru</option>
+                                    <option value="Finalizat" ${f.status==='Finalizat'?'selected':''}>Finalizat</option>
+                                </select><br>
+                            </div>
+                            <button onclick="saveAlocare()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-black text-[10px] uppercase active:scale-95">Actualizează Alocarea</button>
                         </div>` : ''}
                     ${canEditReport ? `
-                        <div class="bg-blue-700 p-6 md:p-8 rounded-3xl text-white shadow-2xl">
-                            <h4 class="font-black uppercase mb-2 italic tracking-widest text-base md:text-lg">Raport Tehnic - ${activeUser.rol === 'admin' ? 'ADMIN' : 'SERVICE'}</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 text-slate-900">
-                                <input type="text" id="s-teh" value="${f.tehnician || ''}" placeholder="Nume Tehnician" class="p-3 rounded-xl text-xs font-bold border-2 border-blue-300">
+                        <div class="bg-blue-700 p-4 md:p-8 rounded-2xl text-white shadow-2xl">
+                            <h4 class="font-black uppercase mb-4 italic text-sm md:text-lg">Raport Tehnic - ${activeUser.rol === 'admin' ? 'MOD ADMIN' : 'MOD SERVICE'}</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4 text-slate-900">
+                                <input type="text" id="s-teh" value="${f.tehnician || ''}" placeholder="Tehnician" class="p-3 rounded-lg text-xs font-bold border-2">
                                 ${(isPropriuType || activeUser.rol === 'admin') ? `
-                                    <input type="text" id="s-km" value="${f.km || ''}" placeholder="Km" class="p-3 rounded-xl text-xs font-bold border-2 border-blue-300">
-                                    <input type="text" id="s-ore" value="${f.ore || ''}" placeholder="Ore" class="p-3 rounded-xl text-xs font-bold border-2 border-blue-300">
+                                    <input type="text" id="s-km" value="${f.km || ''}" placeholder="Km" class="p-3 rounded-lg text-xs font-bold border-2">
+                                    <input type="text" id="s-ore" value="${f.ore || ''}" placeholder="Ore" class="p-3 rounded-lg text-xs font-bold border-2">
                                 ` : ''}
                                 ${(!isPropriuType || activeUser.rol === 'admin') ? `
-                                    <input type="text" id="s-cost" value="${f.cost || ''}" placeholder="Cost Reparație" class="p-3 rounded-xl text-xs font-bold border-2 border-blue-300">
-                                    <input type="text" id="s-emi" value="${f.emitent_factura_service || ''}" placeholder="Nr. Factură" class="p-3 rounded-xl text-xs font-bold border-2 border-blue-300">
+                                    <input type="text" id="s-cost" value="${f.cost || ''}" placeholder="Cost" class="p-3 rounded-lg text-xs font-bold border-2">
+                                    <input type="text" id="s-emi" value="${f.emitent_factura_service || ''}" placeholder="Factura" class="p-3 rounded-lg text-xs font-bold border-2">
                                 ` : ''}
                             </div>
-                            <textarea id="s-rap" placeholder="Descrieți lucrarea..." class="w-full p-4 rounded-2xl text-slate-900 text-xs font-bold mb-6 h-32 border-2 border-blue-300">${f.raport_reparatie || ''}</textarea>
-                            <div class="flex flex-col md:flex-row gap-4">
-                                <button onclick="saveRaport(false)" class="bg-slate-800 py-3 rounded-2xl font-black uppercase text-[10px] hover:bg-slate-900 transition border border-white/20">Ciornă</button>
-                                <button onclick="saveRaport(true)" class="bg-green-500 py-3 rounded-2xl font-black uppercase text-[10px] hover:bg-green-600 transition shadow-xl">Finalizează</button>
+                            <textarea id="s-rap" placeholder="Descrieți lucrarea..." class="w-full p-3 rounded-xl text-slate-900 text-xs font-bold mb-4 h-24 border-2">${f.raport_reparatie || ''}</textarea>
+                            <div class="flex flex-col md:flex-row gap-2">
+                                <button onclick="saveRaport(false)" class="bg-slate-800 py-3 md:py-4 rounded-xl font-black uppercase text-[10px] flex-grow">Salvează Ciornă</button>
+                                <button onclick="saveRaport(true)" class="bg-green-500 py-3 md:py-4 rounded-xl font-black uppercase text-[10px] flex-grow shadow-lg active:scale-95">Finalizează Lucrarea</button>
                             </div>
                         </div>` : ''}
                 </div>`;
         }
-        
 
         async function saveAlocare() {
             const dest = document.getElementById('sel-aloca').value;
@@ -632,18 +612,16 @@
             closeModal(); loadFise();
         }
 
-       async function saveRaport(isFinal) {
+        async function saveRaport(isFinal) {
             const upd = {
                 tehnician: document.getElementById('s-teh').value,
                 raport_reparatie: document.getElementById('s-rap').value,
                 status: isFinal ? 'Finalizat' : 'În lucru'
             };
-            
             if(document.getElementById('s-km')) upd.km = document.getElementById('s-km').value;
             if(document.getElementById('s-ore')) upd.ore = document.getElementById('s-ore').value;
             if(document.getElementById('s-cost')) upd.cost = document.getElementById('s-cost').value;
             if(document.getElementById('s-emi')) upd.emitent_factura_service = document.getElementById('s-emi').value;
-
             await _supa.from('fise').update(upd).eq('id', currentFisa.id);
             closeModal(); loadFise();
         }
@@ -651,11 +629,12 @@
         function switchTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('border-b-4', 'border-blue-600', 'text-blue-600', 'text-slate-900'));
-            let btnId = 'btn-list';
-            if(id === 'tab-add') { btnId = 'btn-add'; if(!document.getElementById('edit-fisa-id').value) document.getElementById('c-data-auto').value = getRoTime(); }
-            if(id === 'tab-users') { btnId = 'btn-users'; loadUsers(); }
+            document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('border-b-4', 'border-blue-600', 'text-blue-600'));
+            let btnId = (id === 'tab-add') ? 'btn-add' : ((id === 'tab-users') ? 'btn-users' : 'btn-list');
+            if(id === 'tab-add' && !document.getElementById('edit-fisa-id').value) document.getElementById('c-data-auto').value = getRoTime();
+            if(id === 'tab-users') loadUsers();
             document.getElementById(btnId).classList.add('border-b-4', 'border-blue-600', 'text-blue-600');
+            window.scrollTo(0,0);
         }
 
         function closeModal() { document.getElementById('modal-view').classList.add('hidden'); }
@@ -672,47 +651,23 @@
         async function exportToExcel() {
             const type = document.getElementById('export-type').value;
             let query = _supa.from('fise').select('*').order('created_at', { ascending: true });
-
             if (type === 'period') {
                 const start = document.getElementById('exp-start').value;
                 const end = document.getElementById('exp-end').value;
                 if (!start || !end) return alert("Selectați perioada!");
                 query = query.gte('created_at', start + "T00:00").lte('created_at', end + "T23:59");
             }
-
             const { data, error } = await query;
-            if (error || !data.length) return alert("Nu există date de exportat!");
-
+            if (error || !data.length) return alert("Nu există date!");
             const rows = data.map((f, idx) => ({
-                "Nr. Crt": idx + 1,
-                "ID Fisa": f.id,
-                "Data Inregistrare": f.created_at ? new Date(f.created_at).toLocaleString('ro-RO') : '',
-                "Nume Client": f.nume_client,
-                "Telefon": f.tel_client,
-                "Email": f.email_client,
-                "Adresa": f.adresa_client,
-                "Categorie": f.categorie,
-                "Marca/Model": f.marca_model,
-                "VIN": f.vin_produs,
-                "Nr Factura": f.nr_factura,
-                "Data Factura": f.data_factura,
-                "Tip Garantie": f.tip_garantie,
-                "Observatii Produs": f.obs_produs,
-                "Data Preluare Fizica": f.data_preluare_fizica,
-                "Reclamatie Client": f.reclamatie_client,
-                "Status": f.status,
-                "Alocat Catre": f.alocat_catre,
-                "Tehnician": f.tehnician,
-                "KM/Ore": f.km || '',
-                "Cost": f.cost || '',
-                "Raport Tehnic": f.raport_reparatie
+                "Nr. Crt": idx + 1, "ID Fisa": f.id, "Data": f.created_at, "Client": f.nume_client,
+                "Telefon": f.tel_client, "Model": f.marca_model, "VIN": f.vin_produs, "Status": f.status,
+                "Service": f.alocat_catre, "Tehnician": f.tehnician, "Raport": f.raport_reparatie
             }));
-
             const worksheet = XLSX.utils.json_to_sheet(rows);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Fise Service");
-
-            XLSX.writeFile(workbook, `Export_Geeli_Service_${new Date().toISOString().slice(0,10)}.xlsx`);
+            XLSX.writeFile(workbook, `Export_Geeli_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
     </script>
 </body>

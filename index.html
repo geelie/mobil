@@ -555,11 +555,6 @@
                 <div class="p-2 md:p-4 border-2 border-slate-100 bg-blue-50/30 text-[11px] md:text-[13px] font-bold text-slate-900 min-h-[40px] whitespace-pre-line rounded-xl">${f.raport_reparatie ? f.raport_reparatie.trim() : 'Diagnosticare în curs...'}</div>
                     </div>
                 </div>
-                <div class="mt-4 flex justify-between px-4 md:px-10 text-[9px] md:text-[11px] font-black uppercase text-slate-900">
-                    <div class="text-center"><p class="mb-2 italic">Semnătură Client</p><div class="w-24 md:w-48 border-b border-slate-900 border-dotted mx-auto"></div></div>
-                    <div class="text-center"><p class="mb-2 italic">Reprezentant Service</p><div class="w-24 md:w-48 border-b border-slate-900 border-dotted mx-auto"></div></div>
-                </div>
-                <div class="mt-auto pt-4 text-[12px] leading-tight text-slate-400 italic text-center border-t border-slate-100">Notă: Datele cu caracter personal din acest document sunt prelucrate în conformitate cu prevederile Regulamentului (UE) 2016/679 (GDPR). Prin semnarea/transmiterea acestui document, vă exprimați acordul pentru prelucrarea datelor în scopul prestării serviciilor.</div>
                 <div class="mt-8 no-print pt-4 border-t-2 border-dashed border-slate-300 space-y-4">
                     ${activeUser.rol === 'admin' ? `
                         <div class="bg-slate-200 p-4 rounded-xl flex flex-col gap-3 shadow-inner">

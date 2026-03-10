@@ -106,11 +106,11 @@
         </div>
     </div>
 
-    <div id="app-section" class="hidden min-h-screen flex flex-col bg-slate-100 text-slate-900 no-print">
+   <div id="app-section" class="hidden min-h-screen flex flex-col bg-slate-100 text-slate-900 no-print">
         <nav class="bg-slate-800 text-white p-0 flex justify-between items-center shadow-lg sticky top-0 z-40 h-12">
             <img src="https://i.ibb.co/6cM58dZH/20260302-184450.png" alt="Logo" class="h-8 md:h-12 object-contain ml-2">
             <div class="flex items-center gap-3">
-              <div class="text-right leading-none flex flex-col justify-center">
+               <div class="text-right leading-none flex flex-col justify-center">
     <p id="nav-user-name" class="font-extrabold text-[10px] md:text-sm"></p>
     <p id="nav-user-info" class="text-[8px] md:text-[10px] text-blue-400 font-black uppercase tracking-widest"></p>
 </div>
@@ -118,7 +118,7 @@
             </div>
         </nav>
 
-        <div class="bg-white border-b-2 flex overflow-x-auto sticky top-[44px] md:top-[54px] z-30 shadow-sm no-scrollbar" id="main-nav">
+        <div class="bg-white border-b-2 flex overflow-x-auto sticky top-12 z-30 shadow-sm no-scrollbar" id="main-nav">
             <button onclick="switchTab('tab-list')" id="btn-list" class="flex-shrink-0 px-6 md:px-8 py-4 font-black border-b-4 border-blue-600 text-blue-600 text-sm md:text-base">LISTĂ FIȘE</button>
             <button onclick="switchTab('tab-add')" id="btn-add" class="hidden flex-shrink-0 px-6 md:px-8 py-4 font-black text-slate-500 hover:text-blue-600 transition text-sm md:text-base">ADĂUGARE / EDITARE</button>
             <button onclick="switchTab('tab-users')" id="btn-users" class="hidden flex-shrink-0 px-6 md:px-8 py-4 font-black text-slate-500 hover:text-blue-600 transition text-sm md:text-base uppercase">Utilizatori</button>
@@ -126,6 +126,25 @@
 
         <main class="flex-grow p-3 md:p-8">
             <div id="tab-list" class="tab-content active">
+                <div id="admin-export-area" class="hidden bg-white p-4 rounded-xl mb-6 border-2 border-blue-100 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-4">
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <span class="text-[10px] font-black uppercase text-blue-700">Export Excel:</span>
+                        <select id="export-type" class="flex-grow md:flex-grow-0 p-2 border rounded font-bold text-xs bg-slate-50 outline-none" onchange="toggleExportDates()">
+                            <option value="all">Toate Fișele</option>
+                            <option value="period">Perioadă Specifică</option>
+                        </select>
+                    </div>
+                    <div id="export-dates" class="hidden flex items-center gap-2 w-full md:w-auto">
+                        <input type="date" id="exp-start" class="flex-grow p-2 border rounded font-bold text-xs">
+                        <span class="text-xs font-bold">-</span>
+                        <input type="date" id="exp-end" class="flex-grow p-2 border rounded font-bold text-xs">
+                    </div>
+                    <button onclick="exportToExcel()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-black text-xs uppercase transition flex items-center justify-center gap-2 active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Export Excel
+                    </button>
+                </div>
+
                 <input type="text" id="search-box" onkeyup="filterTable()" placeholder="Caută după nume, VIN, telefon..." class="w-full p-4 mb-6 border-2 border-slate-300 rounded-xl shadow-sm outline-none font-semibold focus:border-blue-500 transition text-sm md:text-base">
                 
                 <div class="bg-white rounded-2xl shadow-xl overflow-x-auto border border-slate-200">
@@ -156,78 +175,84 @@
                 </div>
             </div>
 
-            <div id="tab-add" class="tab-content max-w-6xl mx-auto">
+          <div id="tab-add" class="tab-content max-w-6xl mx-auto">
                 <div id="edit-indicator" class="hidden bg-amber-100 text-amber-900 p-3 rounded-lg mb-4 font-black text-center border-2 border-amber-400 uppercase text-[10px] md:text-xs">
-                   ${activeUser.rol === 'admin' ? `
-                        <div class="bg-slate-200 p-4 rounded-xl flex flex-col gap-3 shadow-inner">
-                            <span class="text-[10px] font-black uppercase text-slate-800">Alocare & Status (ADMIN):</span>
-                            <div class="flex gap-2">
-                                <select id="sel-aloca" class="flex-grow p-2 border-2 border-slate-300 rounded-lg font-black text-[10px] bg-white text-slate-900">
-    <option value="${f.alocat_catre}">${f.alocat_catre}</option>
-                                    <option value="Propriu">1. Service Propriu</option>
-                                    <option value="Ridicare1">2. RIDICARE1</option>
-                                    <option value="Ridicare2">3. RIDICARE2</option>
-                                    <option value="Ridicare3">4. RIDICARE3</option>
-                                    <option value="BUXI PROFESIONAL">5. BUXI PROFESIONAL</option>
-                                    <option value="MIXX MOTION">6. MIXX MOTION</option>
-                                    <option value="PGC GRAND TOTAL">7. PGC GRAND TOTAL</option>
-                                    <option value="TRANDAFIR GROSU PFA">8. TRANDAFIR GROSU PFA</option>
-                                    <option value="TRUST AGROSERV">9. TRUST AGROSERV</option>
-                                </select><br>
-                                <select id="sel-status-admin" class="p-2 border-2 border-slate-300 rounded-lg font-black text-[10px] bg-white text-slate-900">
-                                    <option value="În lucru" ${f.status==='În lucru'?'selected':''}>În lucru</option>
-                                    <option value="Finalizat" ${f.status==='Finalizat'?'selected':''}>Finalizat</option>
-                                </select><br>
-                            </div>
-                            <div class="flex justify-center w-full mt-4">
-    <button onclick="saveAlocare()" class="px-8 bg-blue-600 text-white py-3 rounded-lg font-black text-[10px] uppercase active:scale-95">
-        Actualizează Alocarea
-    </button>
-</div>
-                        </div>` : ''}
-                    ${canEditReport ? `
-                        <div class="bg-blue-700 p-4 md:p-8 rounded-2xl text-white shadow-2xl">
-                            <h4 class="font-black uppercase mb-4 italic text-sm md:text-lg">Raport Tehnic - ${activeUser.rol === 'admin' ? 'MOD ADMIN' : 'MOD SERVICE'}</h4>
-                           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4 text-slate-900">
-    <div> 
-        <label class="text-[9px] font-black text-white uppercase ml-1">Tehnician</label>
-        <input type="text" id="s-teh" value="${f.tehnician || ''}" placeholder="Tehnician" class="w-full p-3 rounded-lg text-xs font-bold border-2">
-    </div>
+                    Mod EDITARE activ: <span id="edit-id-display"></span>. 
+                    <button onclick="cancelEdit()" class="underline ml-4 text-red-700">ANULEAZĂ</button>
+                </div>
+                <form id="form-fisa-noua" class="bg-white p-5 md:p-8 rounded-2xl shadow-2xl grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 border border-slate-200">
+                    <input type="hidden" id="edit-fisa-id">
+                    
+                    <div class="space-y-4">
+                        <h3 class="font-black text-blue-700 border-b-2 border-blue-100 pb-2 uppercase text-[10px] italic tracking-wider">1. Date Client</h3>
+                       <div>
+                            <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Nume Prenume</label>
+                            <input type="text" id="c-nume" placeholder="Nume Prenume" class="w-full p-3 border-2 border-slate-200 rounded-lg font-semibold text-sm" required>
+                       </div>
+                       <div>
+                            <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Număr telefon</label>
+                            <input type="text" id="c-tel" placeholder="Nr. Telefon" class="w-full p-3 border-2 border-slate-200 rounded-lg font-semibold text-sm">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-black text-slate-800 uppercase ml-1">E-mail</label>
+                            <input type="email" id="c-email" placeholder="Email" class="w-full p-3 border-2 border-slate-200 rounded-lg font-semibold text-sm">
+                       </div>
+                       <div>
+                            <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Adresa domiciliu</label>
+                            <input type="text" id="c-adr" placeholder="Adresa domiciliu" class="w-full p-3 border-2 border-slate-200 rounded-lg font-semibold text-sm">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Data Înregistrare</label>
+                            <input type="datetime-local" id="c-data-auto" class="w-full p-3 border-2 border-slate-200 rounded-lg bg-slate-50 font-bold text-sm">
+                        </div>
+                    </div>
 
-    ${(isPropriuType || activeUser.rol === 'admin') ? `
-    <div> 
-        <label class="text-[9px] font-black text-white uppercase ml-1">Km.</label>
-        <input type="text" id="s-km" value="${f.km || ''}" placeholder="Km" class="w-full p-3 rounded-lg text-xs font-bold border-2">
-    </div>
-    <div> 
-        <label class="text-[9px] font-black text-white uppercase ml-1">Ore</label>
-        <input type="text" id="s-ore" value="${f.ore || ''}" placeholder="Ore" class="w-full p-3 rounded-lg text-xs font-bold border-2">
-    </div>
-    ` : ''}
-
-    ${(!isPropriuType || activeUser.rol === 'admin') ? `
-    <div> 
-        <label class="text-[9px] font-black text-white uppercase ml-1">Cost</label>
-        <input type="text" id="s-cost" value="${f.cost || ''}" placeholder="Cost" class="w-full p-3 rounded-lg text-xs font-bold border-2">
-    </div>
-    <div> 
-        <label class="text-[9px] font-black text-white uppercase ml-1">Factura</label> 
-        <input type="text" id="s-emi" value="${f.emitent_factura_service || ''}" placeholder="Factura" class="w-full p-3 rounded-lg text-xs font-bold border-2">
-    </div>
-    ` : ''}
-    </div>
-   <div class="col-span-1 sm:col-span-2 md:col-span-full"> 
-    <label class="text-[9px] font-black text-white uppercase ml-1">Raport Reparații / Observații</label>
-    <textarea id="s-rap" placeholder="Descrieți lucrarea..." 
-              class="w-full p-3 rounded-xl text-slate-900 text-xs font-bold mb-4 h-24 border-2">${f.raport_reparatie || ''}</textarea>
-</div>                       
-          <div class="flex flex-col md:flex-row gap-2">
-                                <button onclick="saveRaport(false)" class="bg-slate-800 py-3 md:py-4 rounded-xl font-black uppercase text-[10px] flex-grow">Salvează Ciornă</button>
-                                <button onclick="saveRaport(true)" class="bg-green-500 py-3 md:py-4 rounded-xl font-black uppercase text-[10px] flex-grow shadow-lg active:scale-95">Finalizează Lucrarea</button>
-                            </div>
-                        </div>` : ''}
-                </div>`;
-        }
+                    <div class="space-y-4">
+                        <h3 class="font-black text-blue-700 border-b-2 border-blue-100 pb-2 uppercase text-[10px] italic tracking-wider">2. Date Produs</h3>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Categorie Produs</label>
+                            <select id="p-cat" onchange="toggleAltCategorie()" class="w-full p-3 border-2 border-slate-200 rounded-lg text-sm font-black bg-slate-50">
+                                <option value="Bicicleta electrica">Bicicletă Electrică</option>
+                                <option value="Tricicleta electrica">Tricicletă Electrică</option>
+                                <option value="Scuter electric">Scuter Electric</option>
+                                <option value="Cvadraciclu electric">Cvadraciclu Electric</option>
+                                <option value="Alta">Alta (Specificați mai jos)</option>
+                            </select>
+                            <input type="text" id="p-cat-alt" placeholder="Introduceți categoria..." class="hidden w-full p-3 border-2 border-blue-400 rounded-lg font-bold bg-blue-50 text-blue-900 text-sm">
+                       </div>
+                        </div>
+                       <div>
+                             <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Serie VIN</label>
+                             <input type="text" id="p-vin" placeholder="Serie VIN" class="w-full p-3 border-2 border-slate-200 rounded-lg font-mono font-black uppercase text-blue-800 text-sm">
+                       </div>
+                       <div>
+                             <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Marcă / Model</label>
+                             <input type="text" id="p-mod" placeholder="Marcă / Model" class="w-full p-3 border-2 border-slate-200 rounded-lg font-semibold text-sm">
+                       </div>                  
+                            <div class="flex flex-col sm:flex-row gap-2">
+                        <div>
+                            <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Emitent / Nr. Factură / Data Fact.</label>
+                            <input type="text" id="p-fact" placeholder="Emitent/Factură" class="w-full sm:w-[99%] p-3 border-2 border-slate-200 rounded-lg text-xs font-bold">
+                         </div>  
+                            <input type="date" id="p-dfact" class="w-full sm:w-[45%] p-3 border-2 border-slate-200 rounded-lg text-xs font-bold">       
+                        </div>
+                        <div>
+                        <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Stare</label>
+                        <select id="p-gar" class="w-full p-3 border-2 border-slate-200 rounded-lg text-sm font-bold">
+                            <option value="In garantie">În Garanție</option>
+                            <option value="Post garantie">Post Garanție</option>
+                        </select>
+                        </div>
+                        <div>  
+                            <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Observații</label>
+                            <input type="text" id="p-obs-produs" placeholder="Observații (Accesorii, starea etc.)" class="w-full p-3 border-2 border-slate-200 rounded-lg text-xs font-semibold">
+                       </div>
+                       <div>
+                            <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Data Predării Fizice</label>
+                            <input type="date" id="p-dprel" class="w-full p-3 border-2 border-slate-200 rounded-lg text-sm font-bold">
+                        </div>
+                    </div>
 
                     <div class="space-y-4">
                         <h3 class="font-black text-blue-700 border-b-2 border-blue-100 pb-2 uppercase text-[10px] italic tracking-wider">3. Reclamație Client</h3>
@@ -242,6 +267,7 @@
     <div id="modal-view" class="fixed inset-0 bg-black/90 hidden z-50 overflow-y-auto p-2 md:p-4">
         <div class="max-w-[210mm] mx-auto mb-4 flex flex-wrap gap-2 justify-between items-center bg-slate-800 p-3 rounded-xl no-print">
             <div class="flex flex-wrap gap-2">
+                <button onclick="window.print()" class="bg-blue-600 text-white px-4 md:px-6 py-2 rounded-lg font-black text-[10px] uppercase shadow-xl hover:bg-blue-500 active:scale-95">PRINT / PDF</button>
                 <button id="admin-edit-btn" onclick="startEdit()" class="hidden bg-amber-500 text-white px-3 md:px-4 py-2 rounded-lg font-black text-[10px] uppercase active:scale-95">Editează</button>
                 <button id="admin-delete-btn" onclick="deleteFisa()" class="hidden bg-red-600 text-white px-3 md:px-4 py-2 rounded-lg font-black text-[10px] uppercase active:scale-95">Șterge</button>
             </div>
@@ -251,7 +277,6 @@
              <div id="v-render-area" class="h-full flex flex-col"></div>
         </div>
     </div>
-
     <script>
         const SUPA_URL = "https://chsuqecaqhnjqmmuwfhl.supabase.co";
         const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoc3VxZWNhcWhuanFtbXV3ZmhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDQ4NDMsImV4cCI6MjA4ODAyMDg0M30.CRMlqol-pl3DSBSBvpm04PLkSjE9lja3c1JnKnLrWvs";

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Garanții Geeli</title>
+    <link rel="icon" type="image/png" href="https://i.ibb.co/3DK9gMM/20260302-184545.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -24,7 +25,6 @@
             position: relative; 
         }
 
-        /* Scrollbar fin pentru meniu mobil */
         #main-nav::-webkit-scrollbar { height: 4px; }
         #main-nav::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
@@ -46,7 +46,6 @@
             #v-render-area { height: 100%; display: flex; flex-direction: column; }
         }
 
-        /* Ajustări specifice pentru ecrane foarte mici */
         @media (max-width: 640px) {
             .a4-page { padding: 5mm; min-height: auto; }
             h1 { font-size: 1.25rem !important; }
@@ -91,9 +90,9 @@
                 <input type="password" id="r-pass" placeholder="Parolă" class="w-full p-3 border-2 border-slate-200 rounded-lg">
                 <select id="r-service" class="w-full p-3 border-2 border-slate-200 rounded-lg font-bold bg-slate-50">
                     <option value="Propriu">1. Service Propriu</option>
-                    <option value="Ridicare1">2. RIDICARE1</option>
-                    <option value="Ridicare2">3. RIDICARE2</option>
-                    <option value="Ridicare3">4. RIDICARE3</option>
+                    <option value="SERVICE PROPRIU 1">2. SERVICE PROPRIU 1</option>
+                    <option value="SERVICE PROPRIU 2">3. SERVICE PROPRIU 2</option>
+                    <option value="RIDICARE">4. RIDICARE</option>
                     <option value="BUXI PROFESIONAL">5. BUXI PROFESIONAL</option>
                     <option value="MIXX MOTION">6. MIXX MOTION</option>
                     <option value="PGC GRAND TOTAL">7. PGC GRAND TOTAL</option>
@@ -106,7 +105,7 @@
         </div>
     </div>
 
-   <div id="app-section" class="hidden min-h-screen flex flex-col bg-slate-100 text-slate-900 no-print">
+    <div id="app-section" class="hidden min-h-screen flex flex-col bg-slate-100 text-slate-900 no-print">
         <nav class="bg-slate-800 text-white p-0 flex justify-between items-center shadow-lg sticky top-0 z-40 h-12">
             <img src="https://i.ibb.co/6cM58dZH/20260302-184450.png" alt="Logo" class="h-8 md:h-12 object-contain ml-2">
             <div class="flex items-center gap-3">
@@ -126,25 +125,7 @@
 
         <main class="flex-grow p-3 md:p-8">
             <div id="tab-list" class="tab-content active">
-                <div id="admin-export-area" class="hidden bg-white p-4 rounded-xl mb-6 border-2 border-blue-100 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-4">
-                    <div class="flex items-center gap-2 w-full md:w-auto">
-                        <span class="text-[10px] font-black uppercase text-blue-700">Export Excel:</span>
-                        <select id="export-type" class="flex-grow md:flex-grow-0 p-2 border rounded font-bold text-xs bg-slate-50 outline-none" onchange="toggleExportDates()">
-                            <option value="all">Toate Fișele</option>
-                            <option value="period">Perioadă Specifică</option>
-                        </select>
-                    </div>
-                    <div id="export-dates" class="hidden flex items-center gap-2 w-full md:w-auto">
-                        <input type="date" id="exp-start" class="flex-grow p-2 border rounded font-bold text-xs">
-                        <span class="text-xs font-bold">-</span>
-                        <input type="date" id="exp-end" class="flex-grow p-2 border rounded font-bold text-xs">
-                    </div>
-                    <button onclick="exportToExcel()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-black text-xs uppercase transition flex items-center justify-center gap-2 active:scale-95">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Export Excel
-                    </button>
-                </div>
-
+                
                 <input type="text" id="search-box" onkeyup="filterTable()" placeholder="Caută după nume, VIN, telefon..." class="w-full p-4 mb-6 border-2 border-slate-300 rounded-xl shadow-sm outline-none font-semibold focus:border-blue-500 transition text-sm md:text-base">
                 
                 <div class="bg-white rounded-2xl shadow-xl overflow-x-auto border border-slate-200">
@@ -276,6 +257,7 @@
              <div id="v-render-area" class="h-full flex flex-col"></div>
         </div>
     </div>
+
     <script>
         const SUPA_URL = "https://chsuqecaqhnjqmmuwfhl.supabase.co";
         const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoc3VxZWNhcWhuanFtbXV3ZmhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDQ4NDMsImV4cCI6MjA4ODAyMDg0M30.CRMlqol-pl3DSBSBvpm04PLkSjE9lja3c1JnKnLrWvs";
@@ -293,6 +275,20 @@
             const minutes = String(now.getMinutes()).padStart(2, '0');
             return `${year}-${month}-${day}T${hours}:${minutes}`;
         }
+        function formatRelativ(dateStr) {
+    if (!dateStr) return "Recent";
+    const dataModificarii = new Date(dateStr);
+    const acum = new Date();
+    const difSecunde = Math.floor((acum - dataModificarii) / 1000);
+
+    if (difSecunde < 60) return "Chiar acum";
+    const minute = Math.floor(difSecunde / 60);
+    if (minute < 60) return `Acum ${minute}m`;
+    const ore = Math.floor(minute / 60);
+    if (ore < 24) return `Acum ${ore}h`;
+    
+    return dataModificarii.toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit' });
+}
 
         window.onload = () => {
             const saved = localStorage.getItem('geeli_session');
@@ -322,19 +318,23 @@
                 document.getElementById('nav-user-name').innerText = data.nume_complet;
                 document.getElementById('nav-user-info').innerText = `${data.rol} | ${data.service}`;
                 if(data.rol === 'admin') {
-                document.getElementById('btn-add').classList.remove('hidden');
-                document.getElementById('btn-users').classList.remove('hidden');
-}
+                    document.getElementById('btn-add').classList.remove('hidden');
+                    document.getElementById('btn-users').classList.remove('hidden');
+                }
                 document.getElementById('c-data-auto').value = getRoTime();
                 const hRow = document.getElementById('table-head-row');
-                hRow.innerHTML = (activeUser.rol === 'admin' ? '<th class="p-4">#</th>' : '') + `
-                    <th class="p-4">ID Fișă</th>
-                    <th class="p-4">Client / Contact</th>
-                    <th class="p-4">Produs / VIN</th>
-                    <th class="p-4">Vechime</th>
-                    <th class="p-4">Status</th>
-                    <th class="p-4">Service</th>`;
-                loadFise();
+                
+hRow.innerHTML = (activeUser.rol === 'admin' ? '<th class="p-4 border-r border-slate-400">#</th>' : '') + `
+    <th class="p-4 border-r border-slate-400">ID Fișă</th>
+    <th class="p-4 border-r border-slate-400">Client / Contact</th>
+    <th class="p-4 border-r border-slate-400">Produs / VIN</th>
+    <th class="p-4 border-r border-slate-400 text-slate-900">Actualizat</th>
+    <th class="p-4 border-r border-slate-400">Vechime</th>
+    <th class="p-4 border-r border-slate-400">Status</th>
+    <th class="p-4 border-r border-slate-400">Service</th>` + 
+    ((activeUser.rol === 'admin' || activeUser.service === 'RIDICARE') ? '<th class="p-4">Transport</th>' : '');
+               
+    loadFise();
             } else { 
                 if(!storedU) alert("Date incorecte!"); 
                 else localStorage.removeItem('geeli_session');
@@ -354,13 +354,10 @@
             } else alert("Utilizator sau parolă incorectă!");
         }
 
-             function handleLogout() {
-    // Șterge sesiunea salvată pentru a forța delogarea
+        function handleLogout() {
     localStorage.removeItem('geeli_session');
-    
-    // Redirecționează către URL-ul dorit și reîncarcă pagina
     window.location.href = "https://geelie.github.io/mobil/";
-}
+        }
 
         async function handleRegister() {
             const nume = document.getElementById('r-full').value.trim();
@@ -424,32 +421,62 @@
             }
         }
 
-        async function loadFise() {
-            if(activeUser.rol === 'none') {
-                document.getElementById('fise-rows').innerHTML = '<tr><td colspan="7" class="p-10 text-center font-black text-red-600 uppercase">Cont neactivat.</td></tr>';
-                return;
-            }
-            let q = _supa.from('fise').select('*');
-            if(activeUser.rol !== 'admin') q = q.eq('alocat_catre', activeUser.service);
-            const { data } = await q.order('created_at', { ascending: true });
-            if(!data) return;
-            const displayData = [...data].reverse();
-            const body = document.getElementById('fise-rows');
-            body.innerHTML = '';
-            displayData.forEach((f) => {
-                const nrCrt = data.findIndex(x => x.id === f.id) + 1;
-                const vch = calcVechime(f.data_preluare_fizica);
-                body.innerHTML += `<tr onclick='openFisa(${JSON.stringify(f)})' class="border-b border-slate-100">
-                    ${activeUser.rol === 'admin' ? `<td class="p-4 font-black text-slate-400 text-xs">${nrCrt}</td>` : ''}
-                    <td class="p-4 font-mono font-black text-blue-700 text-xs">${f.id}</td>
-                    <td class="p-4 font-black text-slate-900">${f.nume_client}</td>
-                    <td class="p-4 text-xs font-bold text-slate-800">${f.marca_model}<br><span class="text-blue-600 font-black uppercase text-[10px]">${f.vin_produs}</span></td>
-                    <td class="p-4 text-[10px] font-black ${vch.color}">${vch.text}</td>
-                    <td class="p-4"><span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${f.status==='Finalizat'?'bg-green-600 text-white':'bg-amber-500 text-white'}">${f.status}</span></td>
-                    <td class="p-4 text-[9px] font-black text-slate-700 italic">${f.alocat_catre}</td>
-                </tr>`;
-            });
-        }
+      async function loadFise() {
+    if(activeUser.rol === 'none') {
+        document.getElementById('fise-rows').innerHTML = '<tr><td colspan="8" class="p-10 text-center font-black text-red-600 uppercase">Cont neactivat.</td></tr>';
+        return;
+    }    
+    let q = _supa.from('fise').select('*');
+    if(activeUser.rol !== 'admin') q = q.eq('alocat_catre', activeUser.service);
+    
+    const { data } = await q.order('updated_at', { ascending: false });
+    
+    if(!data) return;
+    const displayData = data;
+    
+    const body = document.getElementById('fise-rows');
+    body.innerHTML = '';
+
+    displayData.forEach((f, index) => {
+
+    const nrCrt = index + 1;
+    const vch = calcVechime(f.data_preluare_fizica);
+       
+    const transportStyle = f.tip_transport === 'INTRARE' ? 'text-red-600' : (f.tip_transport === 'IESIRE' ? 'text-green-600' : '');
+    const transportHtml = (activeUser.rol === 'admin' || activeUser.service === 'RIDICARE') ? 
+        `<td class="p-4 font-black text-[10px] ${transportStyle}">${f.tip_transport || ''}</td>` : '';
+
+   body.innerHTML += `<tr onclick='openFisa(${JSON.stringify(f)})' class="border-b border-slate-300 hover:bg-slate-50 cursor-pointer transition-colors">
+    ${activeUser.rol === 'admin' ? `<td class="p-4 border-r border-slate-300 font-black text-slate-400 text-xs">${nrCrt}</td>` : ''}
+    
+    <td class="p-4 border-r border-slate-300 font-mono font-black text-blue-700 text-xs">${f.id}</td>
+    
+    <td class="p-4 border-r border-slate-300 font-black text-slate-900">${f.nume_client}</td>
+    
+    <td class="p-4 border-r border-slate-300 text-xs font-bold text-slate-800">
+        ${f.marca_model}<br>
+        <span class="text-blue-600 font-black uppercase text-[10px]">${f.vin_produs}</span>
+    </td>
+    
+    <td class="p-4 border-r border-slate-300">
+    <span class="text-[9px] font-semibold text-blue-900 bg-slate-200 px-2 py-1 rounded-md border border-slate-300 uppercase">
+        ${formatRelativ(f.updated_at)}
+    </span>
+</td>
+
+    <td class="p-4 border-r border-slate-300 text-[10px] font-black ${vch.color}">${vch.text}</td>
+    
+    <td class="p-4 border-r border-slate-300">
+        <span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${f.status === 'Finalizat' ? 'bg-green-600 text-white' : 'bg-amber-500 text-white'}">
+            ${f.status}
+        </span>
+    </td>
+    
+    <td class="p-4 border-r border-slate-300 text-[9px] font-black text-slate-700 italic">${f.alocat_catre}</td>
+    
+    ${transportHtml} </tr>`;
+});
+}
 
         function calcVechime(dateStr) {
             if(!dateStr) return { text: "-", color: "text-slate-400" };
@@ -459,6 +486,7 @@
                 color: diff <= 14 ? "text-green-700" : "text-red-700"
             };
         }
+    
 
         function toggleAltCategorie() {
             const sel = document.getElementById('p-cat').value;
@@ -539,12 +567,27 @@
             document.getElementById('c-data-auto').value = getRoTime();
         }
 
-        async function deleteFisa() {
-            if(confirm("Ștergi definitiv această fișă?")) {
-                await _supa.from('fise').delete().eq('id', currentFisa.id);
-                closeModal(); loadFise();
-            }
+       async function deleteFisa() {
+    if(confirm(`Sigur doriți să mutați fișa ${currentFisa.id} în arhiva de ștergeri?`)) {
+        const { error } = await _supa
+            .from('fise')
+            .update({ 
+                is_deleted: true,
+                deleted_at: new Date().toISOString(),
+                deleted_by_username: activeUser.username, 
+                deleted_by_name: activeUser.nume_complet
+            })
+            .eq('id', currentFisa.id);
+
+        if (error) {
+            alert("Eroare la ștergere: " + error.message);
+        } else {
+            alert("Fișa a fost arhivată cu succes.");
+            closeModal();
+            loadFise();
         }
+    }
+}
 
         function openFisa(f) {
             currentFisa = f;
@@ -553,7 +596,7 @@
             document.getElementById('admin-delete-btn').classList.toggle('hidden', activeUser.rol !== 'admin');
             const vch = calcVechime(f.data_preluare_fizica);
             const canEditReport = (activeUser.rol === 'admin' || (activeUser.service === f.alocat_catre && f.status === 'În lucru'));
-            const isPropriuType = (f.alocat_catre === 'Propriu' || f.alocat_catre === 'Ridicare1' || f.alocat_catre === 'Ridicare2' || f.alocat_catre === 'Ridicare3');
+            const isPropriuType = (f.alocat_catre === 'Propriu' || f.alocat_catre === 'SERVICE PROPRIU 1' || f.alocat_catre === 'SERVICE PROPRIU 2' || f.alocat_catre === 'RIDICARE');
 
             document.getElementById('v-render-area').innerHTML = `
                 <div class="flex-grow">
@@ -572,7 +615,7 @@
                             <p><b>TEL:</b> ${f.tel_client || '-'}</p>
                             <p><b>EMAIL:</b> ${f.email_client || '-'}</p>
                             <p><b>ADRESA:</b> ${f.adresa_client || '-'}</p>
-                           <p><b>DATA ÎNREG.:</b> ${f.created_at ? (() => {
+                            <p><b>DATA ÎNREG.:</b> ${f.created_at ? (() => {
     const parts = f.created_at.substring(0, 10).split('-'); // [AAAA, LL, ZZ]
     const time = f.created_at.substring(11, 19); // HH:MM:SS
     return `${parts[2]}-${parts[1]}-${parts[0]} ${time}`;
@@ -603,38 +646,81 @@
                 <div class="p-2 md:p-4 border-2 border-slate-100 bg-blue-50/30 text-[11px] md:text-[13px] font-bold text-slate-900 min-h-[40px] whitespace-pre-line rounded-xl">${f.raport_reparatie ? f.raport_reparatie.trim() : 'Diagnosticare în curs...'}</div>
                     </div>
                 </div>
-                <div class="mt-8 no-print pt-4 border-t-2 border-dashed border-slate-300 space-y-4">
-                    ${activeUser.rol === 'admin' ? `
-                        <div class="bg-slate-200 p-4 rounded-xl flex flex-col gap-3 shadow-inner">
-                            <span class="text-[10px] font-black uppercase text-slate-800">Alocare & Status (ADMIN):</span>
-                            <div class="flex gap-2">
-                                <select id="sel-aloca" class="flex-grow p-2 border-2 border-slate-300 rounded-lg font-black text-[10px] bg-white text-slate-900">
-    <option value="${f.alocat_catre}">${f.alocat_catre}</option>
-                                    <option value="Propriu">1. Service Propriu</option>
-                                    <option value="Ridicare1">2. RIDICARE1</option>
-                                    <option value="Ridicare2">3. RIDICARE2</option>
-                                    <option value="Ridicare3">4. RIDICARE3</option>
-                                    <option value="BUXI PROFESIONAL">5. BUXI PROFESIONAL</option>
-                                    <option value="MIXX MOTION">6. MIXX MOTION</option>
-                                    <option value="PGC GRAND TOTAL">7. PGC GRAND TOTAL</option>
-                                    <option value="TRANDAFIR GROSU PFA">8. TRANDAFIR GROSU PFA</option>
-                                    <option value="TRUST AGROSERV">9. TRUST AGROSERV</option>
-                                </select><br>
-                                <select id="sel-status-admin" class="p-2 border-2 border-slate-300 rounded-lg font-black text-[10px] bg-white text-slate-900">
-                                    <option value="În lucru" ${f.status==='În lucru'?'selected':''}>În lucru</option>
-                                    <option value="Finalizat" ${f.status==='Finalizat'?'selected':''}>Finalizat</option>
-                                </select><br>
-                            </div>
-                            <div class="flex justify-center w-full mt-4">
-    <button onclick="saveAlocare()" class="px-8 bg-blue-600 text-white py-3 rounded-lg font-black text-[10px] uppercase active:scale-95">
-        Actualizează Alocarea
-    </button>
+                <div class="mt-4 flex justify-between px-4 md:px-10 text-[9px] md:text-[11px] font-black uppercase text-slate-900">
+    <div class="flex flex-col">
+        <p class="mb-3 italic">Semnătură Client</p>
+        <p class="italic pl-16 text-slate-900">...................</p>
+    </div>
+
+    <div class="flex flex-col">
+        <p class="mb-3 italic">Reprezentant Service</p>
+        <p class="italic pl-20 text-slate-900">...................</p>
+    </div>
 </div>
-                        </div>` : ''}
+               <div class="mt-auto pt-4 text-[11px] leading-tight text-black italic border-t border-slate-100">
+    <p class="mb-2">
+        În conformitate cu O.G. 21/1992 republicată și OUG 140/2021, unitatea noastră garantează lucrările de reparații executate, după cum urmează:
+    </p>
+    <ul class="list-disc pl-5 space-y-1">
+        <li>
+            3 luni de la data recepției vehiculului, dacă lucrarea de reparații nu a necesitat înlocuiri de piese
+        </li>
+        <li>
+            6 luni pentru manoperă și 12 luni pentru piesele furnizate de unitate
+        </li>
+    </ul>
+</div>
+ <div class="mt-auto pt-4 text-[11px] leading-tight text-slate-400 italic border-t border-slate-100">
+    <p class="mb-2">Notă: Datele cu caracter personal din acest document sunt prelucrate în conformitate cu prevederile Regulamentului (UE) 2016/679 (GDPR). Prin semnarea/transmiterea acestui document, vă exprimați acordul pentru prelucrarea datelor în scopul prestării serviciilor</p>
+                <div class="mt-8 no-print pt-4 border-t-2 border-dashed border-slate-300 space-y-4">
+                  ${activeUser.rol === 'admin' ? `
+    <div class="bg-slate-200 p-4 rounded-xl flex flex-col gap-3 shadow-inner">
+        <span class="text-[10px] font-black uppercase text-slate-800">Alocare, Status & Transport (ADMIN):</span>
+        <div class="flex flex-wrap gap-2">
+            <select id="sel-aloca" class="flex-grow p-2 border-2 border-slate-300 rounded-lg font-black text-[10px] bg-white text-slate-900">
+                <option value="${f.alocat_catre}">${f.alocat_catre}</option>
+                <option value="Propriu">1. Service Propriu</option>
+                <option value="SERVICE PROPRIU 1">2. SERVICE PROPRIU 1</option>
+                <option value="SERVICE PROPRIU 2">3. SERVICE PROPRIU 2</option>
+                <option value="RIDICARE">4. RIDICARE</option>
+                <option value="BUXI PROFESIONAL">5. BUXI PROFESIONAL</option>
+                <option value="MIXX MOTION">6. MIXX MOTION</option>
+                <option value="PGC GRAND TOTAL">7. PGC GRAND TOTAL</option>
+                <option value="TRANDAFIR GROSU PFA">8. TRANDAFIR GROSU PFA</option>
+                <option value="TRUST AGROSERV">9. TRUST AGROSERV</option>
+            </select>
+            
+            <select id="sel-status-admin" class="p-2 border-2 border-slate-300 rounded-lg font-black text-[10px] bg-white text-slate-900">
+                <option value="În lucru" ${f.status==='În lucru'?'selected':''}>În lucru</option>
+                <option value="Finalizat" ${f.status==='Finalizat'?'selected':''}>Finalizat</option>
+            </select>
+
+            <select id="sel-transport-admin" class="p-2 border-2 border-slate-300 rounded-lg font-black text-[10px] bg-white text-slate-900">
+                <option value="">Fără Transport</option>
+                <option value="INTRARE" ${f.tip_transport === 'INTRARE' ? 'selected' : ''}>INTRARE</option>
+                <option value="IESIRE" ${f.tip_transport === 'IESIRE' ? 'selected' : ''}>IEȘIRE</option>
+            </select>
+        </div>
+        <div class="flex justify-center w-full mt-4">
+            <button onclick="saveAlocare()" class="px-8 bg-blue-600 text-white py-3 rounded-lg font-black text-[10px] uppercase active:scale-95">
+                Actualizează
+            </button>
+        </div>
+    </div>` : ''}
                     ${canEditReport ? `
                         <div class="bg-blue-700 p-4 md:p-8 rounded-2xl text-white shadow-2xl">
                             <h4 class="font-black uppercase mb-4 italic text-sm md:text-lg">Raport Tehnic - ${activeUser.rol === 'admin' ? 'MOD ADMIN' : 'MOD SERVICE'}</h4>
                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4 text-slate-900">
+                            ${(activeUser.service === 'RIDICARE' || activeUser.rol === 'admin') ? `
+    <div> 
+        <label class="text-[9px] font-black text-white uppercase ml-1">Tip Transport</label>
+        <select id="s-transport" class="w-full p-3 rounded-lg text-xs font-bold border-2 text-slate-900">
+            <option value="">Nespecificat</option>
+            <option value="INTRARE" ${f.tip_transport === 'INTRARE' ? 'selected' : ''}>INTRARE (ROȘU)</option>
+            <option value="IESIRE" ${f.tip_transport === 'IESIRE' ? 'selected' : ''}>IESIRE (VERDE)</option>
+        </select>
+    </div>
+` : ''}
     <div> 
         <label class="text-[9px] font-black text-white uppercase ml-1">Tehnician</label>
         <input type="text" id="s-teh" value="${f.tehnician || ''}" placeholder="Tehnician" class="w-full p-3 rounded-lg text-xs font-bold border-2">
@@ -674,12 +760,24 @@
                         </div>` : ''}
                 </div>`;
         }
-        async function saveAlocare() {
-            const dest = document.getElementById('sel-aloca').value;
-            const stat = document.getElementById('sel-status-admin').value;
-            await _supa.from('fise').update({ alocat_catre: dest, status: stat }).eq('id', currentFisa.id);
-            closeModal(); loadFise();
-        }
+
+       async function saveAlocare() {
+    const dest = document.getElementById('sel-aloca').value;
+    const stat = document.getElementById('sel-status-admin').value;
+    const trans = document.getElementById('sel-transport-admin').value;
+
+   const { error } = await _supa.from('fise').update({ 
+        alocat_catre: dest, 
+        status: stat,
+        tip_transport: trans,
+        updated_at: new Date().toISOString()
+    }).eq('id', currentFisa.id);
+    
+    if (!error) {
+        closeModal(); 
+        await loadFise();
+    }
+}
 
         async function saveRaport(isFinal) {
             const upd = {
@@ -687,6 +785,9 @@
                 raport_reparatie: document.getElementById('s-rap').value,
                 status: isFinal ? 'Finalizat' : 'În lucru'
             };
+            if(document.getElementById('s-transport')) {
+        upd.tip_transport = document.getElementById('s-transport').value;
+    }
             if(document.getElementById('s-km')) upd.km = document.getElementById('s-km').value;
             if(document.getElementById('s-ore')) upd.ore = document.getElementById('s-ore').value;
             if(document.getElementById('s-cost')) upd.cost = document.getElementById('s-cost').value;
@@ -720,23 +821,55 @@
         async function exportToExcel() {
             const type = document.getElementById('export-type').value;
             let query = _supa.from('fise').select('*').order('created_at', { ascending: true });
+
             if (type === 'period') {
                 const start = document.getElementById('exp-start').value;
                 const end = document.getElementById('exp-end').value;
                 if (!start || !end) return alert("Selectați perioada!");
                 query = query.gte('created_at', start + "T00:00").lte('created_at', end + "T23:59");
             }
+
             const { data, error } = await query;
-            if (error || !data.length) return alert("Nu există date!");
+            if (error || !data.length) return alert("Nu există date de exportat!");
+
             const rows = data.map((f, idx) => ({
-                "Nr. Crt": idx + 1, "ID Fisa": f.id, "Data": f.created_at, "Client": f.nume_client,
-                "Telefon": f.tel_client, "Model": f.marca_model, "VIN": f.vin_produs, "Status": f.status,
-                "Service": f.alocat_catre, "Tehnician": f.tehnician, "Raport": f.raport_reparatie
+                "Nr. Crt": idx + 1,
+                "ID Fisa": f.id,
+                "Data Inregistrare": f.created_at ? (() => {
+    const parts = f.created_at.substring(0, 10).split('-');
+    const time = f.created_at.substring(11, 19);
+    return `${parts[2]}-${parts[1]}-${parts[0]} ${time}`;
+})() : '',
+                "Nume Client": f.nume_client,
+                "Telefon": f.tel_client,
+                "Email": f.email_client,
+                "Adresa": f.adresa_client,
+                "Categorie": f.categorie,
+                "Marca/Model": f.marca_model,
+                "VIN": f.vin_produs,
+                "Nr Factura": f.nr_factura,
+                "Data Factura": f.data_factura ? f.data_factura.split('-').reverse().join('-') : '',
+                "Tip Garantie": f.tip_garantie,
+                "Observatii Produs": f.obs_produs,
+                "Data Preluare Fizica": f.data_preluare_fizica ? f.data_preluare_fizica.split('-').reverse().join('-') : '',
+                "Reclamatie Client": f.reclamatie_client,
+                "Status": f.status,
+                "Alocat Catre": f.alocat_catre,
+                "Tehnician": f.tehnician,
+                "KM/Ore": f.km || '',
+                "Cost": f.cost || '',
+                "Raport Tehnic": f.raport_reparatie
             }));
+
             const worksheet = XLSX.utils.json_to_sheet(rows);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Fise Service");
-            XLSX.writeFile(workbook, `Export_Geeli_${new Date().toISOString().slice(0,10)}.xlsx`);
+
+            // Auto-size coloane
+            const max_width = rows.reduce((w, r) => Math.max(w, r["Nume Client"].length), 10);
+            worksheet["!cols"] = [ { wch: 8 }, { wch: 12 }, { wch: 20 }, { wch: 25 } ];
+
+            XLSX.writeFile(workbook, `Export_Geeli_Service_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
     </script>
 </body>

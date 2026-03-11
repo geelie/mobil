@@ -326,7 +326,7 @@
                 
 hRow.innerHTML = (activeUser.rol === 'admin' ? '<th class="p-4 border-r border-slate-400">#</th>' : '') + `
     <th class="p-4 border-r border-slate-400">ID Fișă</th>
-    <th class="p-4 border-r border-slate-400">Client / Contact</th>
+    <th class="p-4 border-r border-slate-400">Client / Telefon</th>
     <th class="p-4 border-r border-slate-400">Produs / VIN</th>
     <th class="p-4 border-r border-slate-400 text-slate-900">Actualizat</th>
     <th class="p-4 border-r border-slate-400">Vechime</th>
@@ -451,7 +451,10 @@ hRow.innerHTML = (activeUser.rol === 'admin' ? '<th class="p-4 border-r border-s
     
     <td class="p-4 border-r border-slate-300 font-mono font-black text-blue-700 text-xs">${f.id}</td>
     
-    <td class="p-4 border-r border-slate-300 font-black text-slate-900">${f.nume_client}</td>
+    <td class="p-4 border-r border-slate-300 font-black text-slate-900">
+    ${f.nume_client}<br>
+    <span class="text-blue-600 font-black uppercase text-[10px]">${f.tel_client || ''}</span>
+</td>
     
     <td class="p-4 border-r border-slate-300 text-xs font-bold text-slate-800">
         ${f.marca_model}<br>

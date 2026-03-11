@@ -439,7 +439,7 @@ hRow.innerHTML = (activeUser.rol === 'admin' ? '<th class="p-4 border-r border-s
 
     displayData.forEach((f, index) => {
 
-    const nrCrt = index + 1;
+    const nrCrt = displayData.length - index;
     const vch = calcVechime(f.data_preluare_fizica);
        
     const transportStyle = f.tip_transport === 'INTRARE' ? 'text-red-600' : (f.tip_transport === 'IESIRE' ? 'text-green-600' : '');

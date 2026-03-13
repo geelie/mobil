@@ -183,6 +183,54 @@
                             <input type="text" id="c-adr" placeholder="Adresa domiciliu" class="w-full p-3 border-2 border-slate-200 rounded-lg font-semibold text-sm">
                         </div>
                         <div>
+    <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Județ</label>
+    <select id="c-judet" class="w-full p-3 border-2 border-slate-200 rounded-lg font-semibold text-sm bg-white">
+        <option value="">Selectează Județ</option>
+        <option value="Alba">Alba</option>
+        <option value="Arad">Arad</option>
+        <option value="Argeș">Argeș</option>
+        <option value="Bacău">Bacău</option>
+        <option value="Bihor">Bihor</option>
+        <option value="Bistrița-Năsăud">Bistrița-Năsăud</option>
+        <option value="Botoșani">Botoșani</option>
+        <option value="Brașov">Brașov</option>
+        <option value="Brăila">Brăila</option>
+        <option value="București">București</option>
+        <option value="Buzău">Buzău</option>
+        <option value="Caraș-Severin">Caraș-Severin</option>
+        <option value="Călărași">Călărași</option>
+        <option value="Cluj">Cluj</option>
+        <option value="Constanța">Constanța</option>
+        <option value="Covasna">Covasna</option>
+        <option value="Dâmbovița">Dâmbovița</option>
+        <option value="Dolj">Dolj</option>
+        <option value="Galați">Galați</option>
+        <option value="Giurgiu">Giurgiu</option>
+        <option value="Gorj">Gorj</option>
+        <option value="Harghita">Harghita</option>
+        <option value="Hunedoara">Hunedoara</option>
+        <option value="Ialomița">Ialomița</option>
+        <option value="Iași">Iași</option>
+        <option value="Ilfov">Ilfov</option>
+        <option value="Maramureș">Maramureș</option>
+        <option value="Mehedinți">Mehedinți</option>
+        <option value="Mureș">Mureș</option>
+        <option value="Neamț">Neamț</option>
+        <option value="Olt">Olt</option>
+        <option value="Prahova">Prahova</option>
+        <option value="Satu Mare">Satu Mare</option>
+        <option value="Sălaj">Sălaj</option>
+        <option value="Sibiu">Sibiu</option>
+        <option value="Suceava">Suceava</option>
+        <option value="Teleorman">Teleorman</option>
+        <option value="Timiș">Timiș</option>
+        <option value="Tulcea">Tulcea</option>
+        <option value="Vaslui">Vaslui</option>
+        <option value="Vâlcea">Vâlcea</option>
+        <option value="Vrancea">Vrancea</option>
+    </select>
+</div>
+                        <div>
                             <label class="text-[9px] font-black text-slate-800 uppercase ml-1">Data Înregistrare</label>
                             <input type="datetime-local" id="c-data-auto" class="w-full p-3 border-2 border-slate-200 rounded-lg bg-slate-50 font-bold text-sm">
                         </div>
@@ -451,9 +499,9 @@ hRow.innerHTML = (activeUser.rol === 'admin' ? '<th class="p-4 border-r border-s
     
     <td class="p-4 border-r border-slate-300 font-mono font-black text-blue-700 text-xs">${f.id}</td>
     
-    <td class="p-4 border-r border-slate-300 font-black text-slate-900">
+   <td class="p-4 border-r border-slate-300 font-black text-slate-900">
     ${f.nume_client}<br>
-    <span class="text-blue-600 font-black uppercase text-[10px]">${f.tel_client || ''}</span>
+    <span class="text-blue-600 font-black uppercase text-[10px]">${f.tel_client || ''} ${f.judet_client ? ' | ' + f.judet_client : ''}</span>
 </td>
     
     <td class="p-4 border-r border-slate-300 text-xs font-bold text-slate-800">
@@ -508,6 +556,7 @@ hRow.innerHTML = (activeUser.rol === 'admin' ? '<th class="p-4 border-r border-s
                 tel_client: document.getElementById('c-tel').value,
                 email_client: document.getElementById('c-email').value,
                 adresa_client: document.getElementById('c-adr').value,
+                judet_client: document.getElementById('c-judet').value,
                 created_at: document.getElementById('c-data-auto').value,
                 categorie: finalCategorie,
                 vin_produs: document.getElementById('p-vin').value,
@@ -540,6 +589,7 @@ hRow.innerHTML = (activeUser.rol === 'admin' ? '<th class="p-4 border-r border-s
             document.getElementById('c-tel').value = f.tel_client || '';
             document.getElementById('c-email').value = f.email_client || '';
             document.getElementById('c-adr').value = f.adresa_client || '';
+            document.getElementById('c-judet').value = f.judet_client || '';
             document.getElementById('c-data-auto').value = f.created_at?.slice(0,16);
             const categoriiStandard = ["Bicicleta electrica", "Tricicleta electrica", "Scuter electric", "Cvadraciclu electric"];
             if (categoriiStandard.includes(f.categorie)) {
@@ -618,6 +668,7 @@ hRow.innerHTML = (activeUser.rol === 'admin' ? '<th class="p-4 border-r border-s
                             <p><b>TEL:</b> ${f.tel_client || '-'}</p>
                             <p><b>EMAIL:</b> ${f.email_client || '-'}</p>
                             <p><b>ADRESA:</b> ${f.adresa_client || '-'}</p>
+                            <p><b>JUDEȚ:</b> ${f.judet_client || '-'}</p>
                             <p><b>DATA ÎNREG.:</b> ${f.created_at ? (() => {
     const parts = f.created_at.substring(0, 10).split('-'); // [AAAA, LL, ZZ]
     const time = f.created_at.substring(11, 19); // HH:MM:SS

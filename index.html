@@ -752,20 +752,20 @@
             if (finalCategorie === 'Alta') finalCategorie = document.getElementById('p-cat-alt').value;
             const fisa = {
                 nume_client: document.getElementById('c-nume').value,
-                tel_client: document.getElementById('c-tel').value,
-                email_client: document.getElementById('c-email').value,
-                adresa_client: document.getElementById('c-adr').value,
-                judet_client: document.getElementById('c-judet').value,
+                tel_client: document.getElementById('c-tel').value || "",
+                email_client: document.getElementById('c-email').value || "",
+                adresa_client: document.getElementById('c-adr').value || "",
+                judet_client: document.getElementById('c-judet').value || "",
                 created_at: document.getElementById('c-data-auto').value,
                 categorie: finalCategorie,
-                vin_produs: document.getElementById('p-vin').value,
-                marca_model: document.getElementById('p-mod').value,
-                nr_factura: document.getElementById('p-fact').value,
-                data_factura: document.getElementById('p-dfact').value,
+                vin_produs: document.getElementById('p-vin').value || "",
+                marca_model: document.getElementById('p-mod').value || "",
+                nr_factura: document.getElementById('p-fact').value || "",
+                data_factura: document.getElementById('p-dfact').value || null,
                 tip_garantie: document.getElementById('p-gar').value,
-                obs_produs: document.getElementById('p-obs-produs').value,
-                data_preluare_fizica: document.getElementById('p-dprel').value,
-                reclamatie_client: document.getElementById('p-rec').value
+                obs_produs: document.getElementById('p-obs-produs').value || "",
+                data_preluare_fizica: document.getElementById('p-dprel').value || null,
+                reclamatie_client: document.getElementById('p-rec').value || ""
             };
             if (editId) await _supa.from('fise').update(fisa).eq('id', editId);
             else {

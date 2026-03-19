@@ -1071,21 +1071,24 @@
         }
 
         async function saveRaport(isFinal) {
-            // Determinăm noul status în funcție de butonul apăsat
+
+            if (!isFinal) {
+                const confirmare = confirm("Sigur dorești să salvezi modificările?");
+                if (!confirmare) {
+                    return;
+                }
+            }
+
             const noulStatus = isFinal ? 'Finalizat' : 'În lucru';
 
-            // Construim obiectul de actualizare
             const upd = {
                 tehnician: document.getElementById('s-teh').value,
                 raport_reparatie: document.getElementById('s-rap').value,
                 status: noulStatus,
-                // LOGICA NOUĂ: 
-                // Dacă isFinal este true, salvăm data curentă în data_finalizare.
-                // Dacă isFinal este false (repunere în lucru), ștergem data_finalizare (null).
+
                 data_finalizare: isFinal ? new Date().toISOString() : null
             };
 
-            // Păstrăm toate funcționalitățile existente de verificare a elementelor din DOM
             if (document.getElementById('s-transport')) {
                 upd.tip_transport = document.getElementById('s-transport').value;
             }
@@ -1095,7 +1098,6 @@
             if (document.getElementById('s-cost')) upd.cost = document.getElementById('s-cost').value;
             if (document.getElementById('s-emi')) upd.emitent_factura_service = document.getElementById('s-emi').value;
 
-            // Executăm actualizarea în baza de date
             const { error } = await _supa.from('fise').update(upd).eq('id', currentFisa.id);
 
             if (error) {

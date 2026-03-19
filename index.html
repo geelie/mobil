@@ -750,6 +750,7 @@
             const editId = document.getElementById('edit-fisa-id').value;
             let finalCategorie = document.getElementById('p-cat').value;
             if (finalCategorie === 'Alta') finalCategorie = document.getElementById('p-cat-alt').value;
+
             const fisa = {
                 nume_client: document.getElementById('c-nume').value,
                 tel_client: document.getElementById('c-tel').value || "",
@@ -767,15 +768,33 @@
                 data_preluare_fizica: document.getElementById('p-dprel').value || null,
                 reclamatie_client: document.getElementById('p-rec').value || ""
             };
-            if (editId) await _supa.from('fise').update(fisa).eq('id', editId);
-            else {
+
+            let result;
+
+            if (editId) {
+
+                result = await _supa.from('fise').update(fisa).eq('id', editId);
+            } else {
+
                 const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, '');
                 fisa.id = dateStr + Math.floor(Math.random() * 100).toString().padStart(3, '0');
                 fisa.status = 'În lucru';
                 fisa.alocat_catre = 'Nealocat';
-                await _supa.from('fise').insert([fisa]);
+                result = await _supa.from('fise').insert([fisa]);
             }
-            cancelEdit(); loadFise(); switchTab('tab-list');
+
+            if (result.error) {
+
+                alert("Eroare la salvare: " + result.error.message);
+            } else {
+
+                alert("Fișa a fost salvată cu succes!");
+
+                cancelEdit();
+                loadFise();
+                switchTab('tab-list');
+                document.getElementById('form-fisa-noua').reset();
+            }
         };
 
         function startEdit() {

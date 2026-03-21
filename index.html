@@ -204,7 +204,9 @@
 
         <main class="flex-grow p-3 md:p-8">
             <div id="tab-list" class="tab-content active">
-                <div id="admin-export-area" class="hidden" style="display: none !important;">
+                <div id="admin-export-area"
+                    class="hidden bg-white p-4 rounded-xl mb-6 border-2 border-blue-100 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-4"
+                    style="display:none !important;">
                     <div class="flex items-center gap-2 w-full md:w-auto">
                         <span class="text-[10px] font-black uppercase text-blue-700">Export Excel:</span>
                         <select id="export-type"
@@ -239,9 +241,18 @@
                     </div>
                 </div>
 
-                <input type="text" id="search-box" onkeyup="filterTable()"
-                    placeholder="Caută după nume, VIN, telefon..."
-                    class="w-full p-4 mb-6 border-2 border-slate-300 rounded-xl shadow-sm outline-none font-semibold focus:border-blue-500 transition text-sm md:text-base">
+                <div class="flex gap-3 mb-6 items-center">
+                    <input type="text" id="search-box" onkeyup="filterTable()"
+                        placeholder="Caută după nume, VIN, telefon..."
+                        class="flex-grow p-4 border-2 border-slate-300 rounded-xl shadow-sm outline-none font-semibold focus:border-blue-500 transition text-sm md:text-base">
+                    <select onchange="changePageSize(this.value)"
+                        class="p-4 border-2 border-slate-300 rounded-xl font-black text-sm bg-white outline-none focus:border-blue-500 transition no-print">
+                        <option value="25">25 fișe / pag.</option>
+                        <option value="50" selected>50 fișe / pag.</option>
+                        <option value="75">75 fișe / pag.</option>
+                        <option value="100">100 fișe / pag.</option>
+                    </select>
+                </div>
 
                 <div class="bg-white rounded-2xl shadow-xl overflow-x-auto border border-slate-200">
                     <table class="w-full text-left min-w-[700px]">
@@ -279,7 +290,7 @@
                     <button onclick="cancelEdit()" class="underline ml-4 text-red-700">ANULEAZĂ</button>
                 </div>
                 <form id="form-fisa-noua"
-                    class="bg-white p-5 md:p-8 rounded-2xl shadow-2xl grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 border border-slate-200 items-start">
+                    class="bg-white p-5 md:p-8 rounded-2xl shadow-2xl grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 border border-slate-200">
                     <input type="hidden" id="edit-fisa-id">
 
                     <div class="space-y-4">
@@ -425,7 +436,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="space-y-4">
                         <h3
                             class="font-black text-blue-700 border-b-2 border-blue-100 pb-2 uppercase text-[10px] italic tracking-wider">
@@ -643,6 +653,117 @@
             }
         }
 
+        // --- PAGINARE ---
+        let ITEMS_PER_PAGE = 50;
+        let allFise = [];
+        let filteredFise = [];
+        let currentPage = 1;
+
+        function changePageSize(val) {
+            ITEMS_PER_PAGE = parseInt(val);
+            renderPage(1);
+        }
+
+        function buildRow(f, index, totalCount) {
+            const nrCrt = totalCount - index;
+            const vch = calcVechime(f);
+            const transportStyle = f.tip_transport === 'INTRARE' ? 'text-red-600' : (f.tip_transport === 'IESIRE' ? 'text-green-600' : '');
+            const transportHtml = (activeUser.rol === 'admin' || activeUser.service === 'RIDICARE') ?
+                `<td class="p-4 font-black text-[10px] ${transportStyle}">${f.tip_transport || ''}</td>` : '';
+            return `<tr onclick='openFisa(${JSON.stringify(f)})' class="border-b border-slate-300 hover:bg-slate-50 cursor-pointer transition-colors">
+    ${activeUser.rol === 'admin' ? `<td class="p-4 border-r border-slate-300 font-black text-slate-400 text-xs">${nrCrt}</td>` : ''}
+    <td class="p-4 border-r border-slate-300 font-mono font-black text-blue-700 text-xs">${f.id}</td>
+<td class="p-4 border-r border-slate-300 font-black text-slate-900">
+    ${f.nume_client}<br>
+    <span class="text-blue-600 font-black uppercase text-[10px]">${f.tel_client || ''} ${f.judet_client ? ' | ' + f.judet_client : ''}</span>
+</td>
+    <td class="p-4 border-r border-slate-300 text-xs font-bold text-slate-800">
+        ${f.marca_model}<br>
+        <span class="text-blue-600 font-black uppercase text-[10px]">${f.vin_produs}</span>
+    </td>
+    <td class="p-2 md:p-4 border-r border-slate-300 whitespace-nowrap">
+    <span class="text-[8px] md:text-[9px] font-bold text-blue-900 bg-slate-200 px-1 py-1 rounded-md border border-slate-300 uppercase">
+        ${formatRelativ(f.updated_at)}
+    </span>
+</td>
+    <td class="p-4 border-r border-slate-300 text-[10px] font-black ${vch.color}">${vch.text}</td>
+    <td class="p-2 md:p-4 border-r border-slate-300 whitespace-nowrap">
+    <span class="px-1.5 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase ${f.status === 'Finalizat' ? 'bg-green-600 text-white' : 'bg-amber-500 text-white'}">
+        ${f.status}
+    </span>
+</td>
+    <td class="p-4 border-r border-slate-300 text-[9px] font-black text-slate-700 italic">${f.alocat_catre}</td>
+    ${transportHtml} </tr>`;
+        }
+
+        function renderPage(page) {
+            currentPage = page;
+            const data = filteredFise;
+            const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
+            const startIndex = (page - 1) * ITEMS_PER_PAGE;
+            const pageData = data.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+            const body = document.getElementById('fise-rows');
+            body.innerHTML = '';
+            pageData.forEach((f, i) => {
+                const globalIndex = startIndex + i;
+                body.innerHTML += buildRow(f, globalIndex, data.length);
+            });
+
+            renderPagination(page, totalPages, data.length);
+        }
+
+        function renderPagination(current, total, totalItems) {
+            let container = document.getElementById('pagination-bar');
+            if (!container) {
+                const tableWrapper = document.querySelector('.bg-white.rounded-2xl.shadow-xl.overflow-x-auto');
+                container = document.createElement('div');
+                container.id = 'pagination-bar';
+                tableWrapper.after(container);
+            }
+
+            if (total <= 1) { container.innerHTML = ''; return; }
+
+            const start = (current - 1) * ITEMS_PER_PAGE + 1;
+            const end = Math.min(current * ITEMS_PER_PAGE, totalItems);
+
+            let pages = [];
+
+            if (total <= 7) {
+                for (let i = 1; i <= total; i++) pages.push(i);
+            } else {
+                pages.push(1);
+                if (current > 3) pages.push('...');
+                for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
+                if (current < total - 2) pages.push('...');
+                pages.push(total);
+            }
+
+            container.className = 'flex flex-wrap items-center justify-between gap-3 mt-4 px-2 py-3 no-print';
+            container.innerHTML = `
+                <span class="text-xs font-bold text-slate-500">
+                    Afișate <b>${start}–${end}</b> din <b>${totalItems}</b> fișe &nbsp;|&nbsp; Pagina <b>${current}</b> din <b>${total}</b>
+                </span>
+                <div class="flex flex-wrap gap-1">
+                    <button onclick="renderPage(${current - 1})" ${current === 1 ? 'disabled' : ''}
+                        class="px-3 py-1.5 rounded-lg text-xs font-black border-2 ${current === 1 ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100 transition'}">
+                        ← Prev
+                    </button>
+                    ${pages.map(p => p === '...'
+                ? `<span class="px-2 py-1.5 text-xs text-slate-400 font-bold self-center">…</span>`
+                : `<button onclick="renderPage(${p})"
+                            class="px-3 py-1.5 rounded-lg text-xs font-black border-2 transition ${p === current
+                    ? 'bg-blue-600 border-blue-600 text-white shadow'
+                    : 'border-slate-300 text-slate-600 hover:bg-blue-50 hover:border-blue-300'
+                }">${p}</button>`
+            ).join('')}
+                    <button onclick="renderPage(${current + 1})" ${current === total ? 'disabled' : ''}
+                        class="px-3 py-1.5 rounded-lg text-xs font-black border-2 ${current === total ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100 transition'}">
+                        Next →
+                    </button>
+                </div>`;
+        }
+
         async function loadFise() {
             if (activeUser.rol === 'none') {
                 document.getElementById('fise-rows').innerHTML = '<tr><td colspan="8" class="p-10 text-center font-black text-red-600 uppercase">Cont neactivat.</td></tr>';
@@ -655,57 +776,13 @@
             const { data } = await q.order('updated_at', { ascending: false });
 
             if (!data) return;
-            const displayData = data;
-
-            const body = document.getElementById('fise-rows');
-            body.innerHTML = '';
-
-            displayData.forEach((f, index) => {
-
-                const nrCrt = displayData.length - index;
-                const vch = calcVechime(f);
-
-                const transportStyle = f.tip_transport === 'INTRARE' ? 'text-red-600' : (f.tip_transport === 'IESIRE' ? 'text-green-600' : '');
-                const transportHtml = (activeUser.rol === 'admin' || activeUser.service === 'RIDICARE') ?
-                    `<td class="p-4 font-black text-[10px] ${transportStyle}">${f.tip_transport || ''}</td>` : '';
-
-                body.innerHTML += `<tr onclick='openFisa(${JSON.stringify(f)})' class="border-b border-slate-300 hover:bg-slate-50 cursor-pointer transition-colors">
-    ${activeUser.rol === 'admin' ? `<td class="p-4 border-r border-slate-300 font-black text-slate-400 text-xs">${nrCrt}</td>` : ''}
-    
-    <td class="p-4 border-r border-slate-300 font-mono font-black text-blue-700 text-xs">${f.id}</td>
-    
-<td class="p-4 border-r border-slate-300 font-black text-slate-900">
-    ${f.nume_client}<br>
-    <span class="text-blue-600 font-black uppercase text-[10px]">${f.tel_client || ''} ${f.judet_client ? ' | ' + f.judet_client : ''}</span>
-</td>
-    
-    <td class="p-4 border-r border-slate-300 text-xs font-bold text-slate-800">
-        ${f.marca_model}<br>
-        <span class="text-blue-600 font-black uppercase text-[10px]">${f.vin_produs}</span>
-    </td>
-    
-    <td class="p-2 md:p-4 border-r border-slate-300 whitespace-nowrap">
-    <span class="text-[8px] md:text-[9px] font-bold text-blue-900 bg-slate-200 px-1 py-1 rounded-md border border-slate-300 uppercase">
-        ${formatRelativ(f.updated_at)}
-    </span>
-</td>
-
-    <td class="p-4 border-r border-slate-300 text-[10px] font-black ${vch.color}">${vch.text}</td>
-    
-    <td class="p-2 md:p-4 border-r border-slate-300 whitespace-nowrap">
-    <span class="px-1.5 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase ${f.status === 'Finalizat' ? 'bg-green-600 text-white' : 'bg-amber-500 text-white'}">
-        ${f.status}
-    </span>
-</td>
-    
-    <td class="p-4 border-r border-slate-300 text-[9px] font-black text-slate-700 italic">${f.alocat_catre}</td>
-    
-    ${transportHtml} </tr>`;
-            });
+            allFise = data;
+            filteredFise = data;
+            renderPage(1);
         }
 
         function calcVechime(fisa) {
-            // Verificăm dacă există data de preluare fizică (punctul de pornire)
+
             if (!fisa || !fisa.data_preluare_fizica) {
                 return { text: "-", color: "text-slate-400" };
             }
@@ -713,20 +790,15 @@
             const dataStart = new Date(fisa.data_preluare_fizica);
             let dataReferinta;
 
-            // LOGICA DE ÎNGHEȚARE:
-            // Dacă fisa are data_finalizare (status Finalizat/Refuzat), calculăm până la acel moment.
-            // Altfel (este "În lucru"), calculăm până în momentul prezent (new Date()).
             if (fisa.data_finalizare) {
                 dataReferinta = new Date(fisa.data_finalizare);
             } else {
                 dataReferinta = new Date();
             }
 
-            // Calculăm diferența în zile
             const diffTime = dataReferinta - dataStart;
             let diffZile = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-            // Ne asigurăm că nu afișăm zile negative în cazul unor erori de input
             if (diffZile < 0) diffZile = 0;
 
             const esteDepasit = diffZile > 14;
@@ -736,7 +808,6 @@
                 color: esteDepasit ? "text-red-700" : "text-green-700"
             };
         }
-
 
         function toggleAltCategorie() {
             const sel = document.getElementById('p-cat').value;
@@ -1045,8 +1116,6 @@
             const stat = document.getElementById('sel-status-admin').value;
             const trans = document.getElementById('sel-transport-admin').value;
 
-            // LOGICA NOUĂ: Verificăm dacă noul status selectat este unul care "îngheață" timpul.
-            // Dacă statusul este "Finalizat" sau "Refuzat", oprim cronometrul.
             const esteStatusFinal = (stat === 'Finalizat' || stat === 'Refuzat');
 
             const updateData = {
@@ -1054,8 +1123,7 @@
                 status: stat,
                 tip_transport: trans,
                 updated_at: new Date().toISOString(),
-                // Dacă este status final, salvăm data curentă. 
-                // Dacă este "În lucru", setăm null pentru a relua numărătoarea.
+
                 data_finalizare: esteStatusFinal ? new Date().toISOString() : null
             };
 
@@ -1085,7 +1153,6 @@
                 tehnician: document.getElementById('s-teh').value,
                 raport_reparatie: document.getElementById('s-rap').value,
                 status: noulStatus,
-
                 data_finalizare: isFinal ? new Date().toISOString() : null
             };
 
@@ -1131,8 +1198,23 @@
 
         function closeModal() { document.getElementById('modal-view').classList.add('hidden'); }
         function filterTable() {
-            const q = document.getElementById('search-box').value.toLowerCase();
-            document.querySelectorAll('#fise-rows tr').forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none');
+            const q = document.getElementById('search-box').value.toLowerCase().trim();
+            if (!q) {
+                filteredFise = allFise;
+            } else {
+                filteredFise = allFise.filter(f => {
+                    return (f.nume_client || '').toLowerCase().includes(q)
+                        || (f.vin_produs || '').toLowerCase().includes(q)
+                        || (f.tel_client || '').toLowerCase().includes(q)
+                        || (f.marca_model || '').toLowerCase().includes(q)
+                        || (f.id || '').toLowerCase().includes(q)
+                        || (f.judet_client || '').toLowerCase().includes(q)
+                        || (f.email_client || '').toLowerCase().includes(q)
+                        || (f.status || '').toLowerCase().includes(q)
+                        || (f.alocat_catre || '').toLowerCase().includes(q);
+                });
+            }
+            renderPage(1);
         }
 
         function toggleExportDates() {
@@ -1146,15 +1228,9 @@
 
             if (type === 'current') {
 
-                const visibleRows = Array.from(document.querySelectorAll('#fise-rows tr')).filter(tr => tr.style.display !== 'none');
+                if (filteredFise.length === 0) return alert("Nu există date vizibile de exportat!");
 
-                if (visibleRows.length === 0) return alert("Nu există date vizibile de exportat!");
-
-                const visibleIds = visibleRows.map(tr => tr.cells[activeUser.rol === 'admin' ? 1 : 0].innerText.trim());
-
-                const { data, error } = await _supa.from('fise').select('*').in('id', visibleIds);
-                if (error) return alert("Eroare la preluarea datelor filtrate!");
-                dataToExport = data;
+                dataToExport = filteredFise;
             } else {
 
                 let query = _supa.from('fise').select('*').eq('is_deleted', false).order('created_at', { ascending: true });

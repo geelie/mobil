@@ -204,9 +204,7 @@
 
         <main class="flex-grow p-3 md:p-8">
             <div id="tab-list" class="tab-content active">
-                <div id="admin-export-area"
-                    class="hidden bg-white p-4 rounded-xl mb-6 border-2 border-blue-100 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-4"
-                    style="display:none !important;">
+                <div id="admin-export-area" class="hidden" style="display: none !important;">
                     <div class="flex items-center gap-2 w-full md:w-auto">
                         <span class="text-[10px] font-black uppercase text-blue-700">Export Excel:</span>
                         <select id="export-type"
@@ -247,10 +245,10 @@
                         class="flex-grow min-w-0 p-3 md:p-4 border-2 border-slate-300 rounded-xl shadow-sm outline-none font-semibold focus:border-blue-500 transition text-sm md:text-base">
                     <select onchange="changePageSize(this.value)"
                         class="flex-shrink-0 w-20 md:w-auto p-2 md:p-4 border-2 border-slate-300 rounded-xl font-black text-xs md:text-sm bg-white outline-none focus:border-blue-500 transition no-print">
-                        <option value="25">25/pag</option>
-                        <option value="50" selected>50/pag</option>
-                        <option value="75">75/pag</option>
-                        <option value="100">100/pag</option>
+                        <option value="25">25 fișe/pag.</option>
+                        <option value="50" selected>50 fișe/pag.</option>
+                        <option value="75">75 fișe/pag.</option>
+                        <option value="100">100 fișe/pag.</option>
                     </select>
                 </div>
 
@@ -653,25 +651,26 @@
             }
         }
 
-        // --- PAGINARE ---
+        // --- PAGINARE SERVER-SIDE ---
         let ITEMS_PER_PAGE = 50;
-        let allFise = [];
-        let filteredFise = [];
         let currentPage = 1;
+        let totalFiseCount = 0;     // total fișe din baza de date (pentru coloana #)
+        let totalFilteredCount = 0; // total fișe după filtrare (pentru paginare)
+        let currentSearchQuery = '';
+        let _searchDebounceTimer = null;
 
         function changePageSize(val) {
             ITEMS_PER_PAGE = parseInt(val);
-            renderPage(1);
+            loadFise(1);
         }
 
-        function buildRow(f, index, totalCount) {
-            const nrCrt = totalCount - index;
+        function buildRow(f, globalNrCrt) {
             const vch = calcVechime(f);
             const transportStyle = f.tip_transport === 'INTRARE' ? 'text-red-600' : (f.tip_transport === 'IESIRE' ? 'text-green-600' : '');
             const transportHtml = (activeUser.rol === 'admin' || activeUser.service === 'RIDICARE') ?
                 `<td class="p-4 font-black text-[10px] ${transportStyle}">${f.tip_transport || ''}</td>` : '';
             return `<tr onclick='openFisa(${JSON.stringify(f)})' class="border-b border-slate-300 hover:bg-slate-50 cursor-pointer transition-colors">
-    ${activeUser.rol === 'admin' ? `<td class="p-4 border-r border-slate-300 font-black text-slate-400 text-xs">${nrCrt}</td>` : ''}
+    ${activeUser.rol === 'admin' ? `<td class="p-4 border-r border-slate-300 font-black text-slate-400 text-xs">${globalNrCrt}</td>` : ''}
     <td class="p-4 border-r border-slate-300 font-mono font-black text-blue-700 text-xs">${f.id}</td>
 <td class="p-4 border-r border-slate-300 font-black text-slate-900">
     ${f.nume_client}<br>
@@ -696,24 +695,7 @@
     ${transportHtml} </tr>`;
         }
 
-        function renderPage(page) {
-            currentPage = page;
-            const data = filteredFise;
-            const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
-            const startIndex = (page - 1) * ITEMS_PER_PAGE;
-            const pageData = data.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-            const body = document.getElementById('fise-rows');
-            body.innerHTML = '';
-            pageData.forEach((f, i) => {
-                const globalIndex = startIndex + i;
-                body.innerHTML += buildRow(f, globalIndex, data.length);
-            });
-
-            renderPagination(page, totalPages, data.length);
-        }
-
-        function renderPagination(current, total, totalItems) {
+        function renderPagination(current, total, totalItems, totalDb) {
             let container = document.getElementById('pagination-bar');
             if (!container) {
                 const tableWrapper = document.querySelector('.bg-white.rounded-2xl.shadow-xl.overflow-x-auto');
@@ -722,13 +704,12 @@
                 tableWrapper.after(container);
             }
 
-            if (total <= 1) { container.innerHTML = ''; return; }
+            if (total <= 1 && totalItems <= ITEMS_PER_PAGE) { container.innerHTML = ''; return; }
 
             const start = (current - 1) * ITEMS_PER_PAGE + 1;
             const end = Math.min(current * ITEMS_PER_PAGE, totalItems);
 
             let pages = [];
-
             if (total <= 7) {
                 for (let i = 1; i <= total; i++) pages.push(i);
             } else {
@@ -739,46 +720,113 @@
                 pages.push(total);
             }
 
+            const filterInfo = (totalItems < totalDb) ? ` &nbsp;<span class="text-blue-600">(filtrate din ${totalDb} total)</span>` : '';
+
             container.className = 'flex flex-wrap items-center justify-between gap-3 mt-4 px-2 py-3 no-print';
             container.innerHTML = `
                 <span class="text-xs font-bold text-slate-500">
-                    Afișate <b>${start}–${end}</b> din <b>${totalItems}</b> fișe &nbsp;|&nbsp; Pagina <b>${current}</b> din <b>${total}</b>
+                    Afișate <b>${start}–${end}</b> din <b>${totalItems}</b> fișe${filterInfo} &nbsp;|&nbsp; Pagina <b>${current}</b> din <b>${total}</b>
                 </span>
                 <div class="flex flex-wrap gap-1">
-                    <button onclick="renderPage(${current - 1})" ${current === 1 ? 'disabled' : ''}
+                    <button onclick="loadFise(${current - 1})" ${current === 1 ? 'disabled' : ''}
                         class="px-3 py-1.5 rounded-lg text-xs font-black border-2 ${current === 1 ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100 transition'}">
                         ← Prev
                     </button>
                     ${pages.map(p => p === '...'
                 ? `<span class="px-2 py-1.5 text-xs text-slate-400 font-bold self-center">…</span>`
-                : `<button onclick="renderPage(${p})"
+                : `<button onclick="loadFise(${p})"
                             class="px-3 py-1.5 rounded-lg text-xs font-black border-2 transition ${p === current
                     ? 'bg-blue-600 border-blue-600 text-white shadow'
                     : 'border-slate-300 text-slate-600 hover:bg-blue-50 hover:border-blue-300'
                 }">${p}</button>`
             ).join('')}
-                    <button onclick="renderPage(${current + 1})" ${current === total ? 'disabled' : ''}
+                    <button onclick="loadFise(${current + 1})" ${current === total ? 'disabled' : ''}
                         class="px-3 py-1.5 rounded-lg text-xs font-black border-2 ${current === total ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 text-slate-600 hover:bg-slate-100 transition'}">
                         Next →
                     </button>
                 </div>`;
         }
 
-        async function loadFise() {
+        // Construiește query-ul de bază cu toate filtrele active (pentru refolosire)
+        function buildBaseQuery(forCount = false) {
+            const q = currentSearchQuery.trim().toLowerCase();
+            let query = _supa.from('fise')
+                .select(forCount ? '*' : '*', { count: 'exact', head: forCount })
+                .eq('is_deleted', false);
+
+            if (activeUser.rol !== 'admin') query = query.eq('alocat_catre', activeUser.service);
+
+            if (q) {
+                // Filtrare server-side pe toate criteriile din filterTable original
+                // Supabase acceptă ilike și or pentru text search
+                query = query.or([
+                    `nume_client.ilike.%${q}%`,
+                    `vin_produs.ilike.%${q}%`,
+                    `tel_client.ilike.%${q}%`,
+                    `marca_model.ilike.%${q}%`,
+                    `id.ilike.%${q}%`,
+                    `judet_client.ilike.%${q}%`,
+                    `email_client.ilike.%${q}%`,
+                    `status.ilike.%${q}%`,
+                    `alocat_catre.ilike.%${q}%`
+                ].join(','));
+            }
+
+            return query;
+        }
+
+        async function loadFise(page = 1) {
             if (activeUser.rol === 'none') {
                 document.getElementById('fise-rows').innerHTML = '<tr><td colspan="8" class="p-10 text-center font-black text-red-600 uppercase">Cont neactivat.</td></tr>';
                 return;
             }
+
+            currentPage = page;
             updateArchiveCounter();
-            let q = _supa.from('fise').select('*').eq('is_deleted', false);
-            if (activeUser.rol !== 'admin') q = q.eq('alocat_catre', activeUser.service);
 
-            const { data } = await q.order('updated_at', { ascending: false });
+            // Obținem totalul din BD (fără filtre de căutare) pentru numerotarea coloanei #
+            if (activeUser.rol === 'admin') {
+                let totalQ = _supa.from('fise').select('*', { count: 'exact', head: true }).eq('is_deleted', false);
+                const { count: dbCount } = await totalQ;
+                totalFiseCount = dbCount || 0;
+            }
 
-            if (!data) return;
-            allFise = data;
-            filteredFise = data;
-            renderPage(1);
+            // Obținem totalul cu filtrele active (pentru paginare)
+            const { count: filteredCount } = await buildBaseQuery(true);
+            totalFilteredCount = filteredCount || 0;
+
+            const totalPages = Math.max(1, Math.ceil(totalFilteredCount / ITEMS_PER_PAGE));
+            if (page > totalPages) page = currentPage = totalPages;
+
+            const offset = (page - 1) * ITEMS_PER_PAGE;
+
+            // Obținem datele paginii curente
+            const { data, error } = await buildBaseQuery(false)
+                .order('updated_at', { ascending: false })
+                .range(offset, offset + ITEMS_PER_PAGE - 1);
+
+            if (error) {
+                console.error('Eroare loadFise:', error);
+                return;
+            }
+
+            const body = document.getElementById('fise-rows');
+            body.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                body.innerHTML = '<tr><td colspan="9" class="p-10 text-center font-black text-slate-400 italic">Nu există fișe.</td></tr>';
+                renderPagination(1, 1, 0, totalFiseCount);
+                return;
+            }
+
+            // Numerotarea: ultimul număr = totalFiseCount (total BD), descrescător
+            // Primul rând de pe pagina 1 = totalFilteredCount, descrescând
+            data.forEach((f, i) => {
+                const globalNrCrt = totalFilteredCount - offset - i;
+                body.innerHTML += buildRow(f, globalNrCrt);
+            });
+
+            renderPagination(page, totalPages, totalFilteredCount, totalFiseCount);
         }
 
         function calcVechime(fisa) {
@@ -1198,23 +1246,12 @@
 
         function closeModal() { document.getElementById('modal-view').classList.add('hidden'); }
         function filterTable() {
-            const q = document.getElementById('search-box').value.toLowerCase().trim();
-            if (!q) {
-                filteredFise = allFise;
-            } else {
-                filteredFise = allFise.filter(f => {
-                    return (f.nume_client || '').toLowerCase().includes(q)
-                        || (f.vin_produs || '').toLowerCase().includes(q)
-                        || (f.tel_client || '').toLowerCase().includes(q)
-                        || (f.marca_model || '').toLowerCase().includes(q)
-                        || (f.id || '').toLowerCase().includes(q)
-                        || (f.judet_client || '').toLowerCase().includes(q)
-                        || (f.email_client || '').toLowerCase().includes(q)
-                        || (f.status || '').toLowerCase().includes(q)
-                        || (f.alocat_catre || '').toLowerCase().includes(q);
-                });
-            }
-            renderPage(1);
+            currentSearchQuery = document.getElementById('search-box').value.trim();
+            // Debounce: așteptăm 350ms după ultimul caracter înainte de a interoga serverul
+            clearTimeout(_searchDebounceTimer);
+            _searchDebounceTimer = setTimeout(() => {
+                loadFise(1);
+            }, 350);
         }
 
         function toggleExportDates() {
@@ -1227,13 +1264,20 @@
             let dataToExport = [];
 
             if (type === 'current') {
+                // Exportăm TOATE fișele filtrate de pe server (nu doar pagina curentă)
+                if (totalFilteredCount === 0) return alert("Nu există date vizibile de exportat!");
 
-                if (filteredFise.length === 0) return alert("Nu există date vizibile de exportat!");
+                // Fetch toate fișele filtrate de pe server
+                let exportQuery = buildBaseQuery(false)
+                    .order('updated_at', { ascending: false })
+                    .range(0, totalFilteredCount - 1);
+                const { data: filteredAll, error: errF } = await exportQuery;
+                if (errF || !filteredAll) return alert("Eroare la export: " + (errF?.message || 'necunoscută'));
+                dataToExport = filteredAll;
 
-                dataToExport = filteredFise;
             } else {
-
                 let query = _supa.from('fise').select('*').eq('is_deleted', false).order('created_at', { ascending: true });
+                if (activeUser.rol !== 'admin') query = query.eq('alocat_catre', activeUser.service);
 
                 if (type === 'period') {
                     const start = document.getElementById('exp-start').value;
@@ -1282,6 +1326,7 @@
             XLSX.utils.book_append_sheet(workbook, worksheet, "Fise Service");
             XLSX.writeFile(workbook, `Export_Geeli_Service_${new Date().toISOString().slice(0, 10)}.xlsx`);
         }
+
         async function openArchiveModal() {
             if (activeUser.rol !== 'admin') return;
 
